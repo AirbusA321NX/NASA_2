@@ -1,0 +1,98 @@
+# Data Pipeline Requirements
+# Core dependencies for NASA OSDR data processing and AI integration
+
+# Web scraping and HTTP requests
+aiohttp==3.9.1
+requests==2.31.0
+beautifulsoup4==4.12.2
+
+# Data processing and analysis
+pandas==2.1.4
+numpy==1.24.3
+scipy==1.11.4
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# Streamlit dashboard
+streamlit==1.29.0
+plotly==5.17.0
+
+# Natural Language Processing
+spacy==3.7.2
+nltk==3.8.1
+transformers==4.36.2
+torch==2.1.2
+sentence-transformers==2.2.2
+
+# PDF and document processing
+PyPDF2==3.0.1
+python-docx==1.1.0
+textract==1.6.5
+
+# AI and Machine Learning
+scikit-learn==1.3.2
+openai==1.6.1
+mistralai==0.0.12
+
+# Database connectivity
+psycopg2-binary==2.9.9
+neo4j==5.15.0
+redis==5.0.1
+asyncpg==0.29.0
+
+# File processing
+python-magic==0.4.27
+python-multipart==0.0.6
+
+# FastAPI for API endpoints
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Data validation
+pydantic==2.5.2
+pydantic-settings==2.1.0
+
+# Async processing
+celery==5.3.4
+kombu==5.3.4
+
+# Utilities
+python-dotenv==1.0.0
+pathlib==1.0.1
+tqdm==4.66.1
+click==8.1.7
+
+# Logging and monitoring
+structlog==23.2.0
+sentry-sdk==1.39.2
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+
+# Development tools
+black==23.12.0
+isort==5.13.2
+flake8==6.1.0
+mypy==1.8.0
+
+# AWS integration for S3 access
+boto3==1.34.0
+botocore==1.34.0
+
+# Archive processing
+rarfile==4.1
+py7zr==0.20.8
+
+# Vector storage and similarity search
+faiss-cpu==1.7.4
+
+# Scientific NLP processing
+scispacy==0.5.3
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.3/en_core_sci_md-0.5.3.tar.gz
+
+# Additional dependencies for summarization module
+scikit-learn==1.3.2

@@ -1,0 +1,9 @@
+node_modules/ 
+*.log 
+.env 
+.DS_Store 
+__pycache__/ 
+*.h5 
+*.pt 
+*.ckpt 
+*.db 

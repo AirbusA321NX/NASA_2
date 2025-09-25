@@ -1,68 +1,4 @@
 {
-<<<<<<< HEAD
-  "name": "nasa-space-biology-backend",
-  "version": "1.0.0",
-  "description": "Backend API for NASA Space Biology Knowledge Engine",
-  "main": "src/index.js",
-  "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
-    "build": "npm run build:clean && npm run build:compile",
-    "build:clean": "rimraf dist",
-    "build:compile": "babel src --out-dir dist --copy-files",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "eslint src --ext .js",
-    "lint:fix": "eslint src --ext .js --fix",
-    "format": "prettier --write \"src/**/*.js\""
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "helmet": "^7.1.0",
-    "dotenv": "^16.3.1",
-    "express-rate-limit": "^7.1.5",
-    "compression": "^1.7.4",
-    "morgan": "^1.10.0",
-    "winston": "^3.11.0",
-    "express-validator": "^7.0.1",
-    "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
-    "axios": "^1.6.2",
-    "node-cron": "^3.0.3",
-    "redis": "^4.6.10",
-    "neo4j-driver": "^5.15.0",
-    "pg": "^8.11.3",
-    "prisma": "^5.7.1",
-    "@prisma/client": "^5.7.1",
-    "multer": "^1.4.5-lts.1",
-    "sharp": "^0.33.1",
-    "pdf-parse": "^1.1.1",
-    "mammoth": "^1.6.0",
-    "elasticsearch": "^16.7.3",
-    "uuid": "^9.0.1",
-    "date-fns": "^2.30.0",
-    "lodash": "^4.17.21",
-    "joi": "^17.11.0",
-    "socket.io": "^4.7.4",
-    "openai": "^4.20.1",
-    "bull": "^4.12.2",
-    "ioredis": "^5.3.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.2",
-    "jest": "^29.7.0",
-    "supertest": "^6.3.3",
-    "@babel/core": "^7.23.6",
-    "@babel/preset-env": "^7.23.6",
-    "@babel/cli": "^7.23.4",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-node": "^11.1.0",
-    "prettier": "^3.1.1",
-    "rimraf": "^5.0.5"
-=======
   "name": "nasa-space-biology-engine",
   "version": "1.0.0",
   "description": "NASA Space Biology Knowledge Engine - 2025 Space Apps Challenge",
@@ -71,7 +7,7 @@
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:data\"",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev", 
-    "dev:data": "cd data-pipeline && python -m uvicorn main:app --reload --port 8002",
+    "dev:data": "cd data-pipeline && python -m uvicorn main:app --reload --port 8003",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",
@@ -98,21 +34,11 @@
   ],
   "devDependencies": {
     "concurrently": "^8.2.2"
->>>>>>> e9be14db (Initial commit with all project files)
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
-<<<<<<< HEAD
-  "keywords": [
-    "nasa",
-    "space-biology",
-    "api",
-    "knowledge-engine",
-    "express",
-    "node.js"
-=======
   "repository": {
     "type": "git",
     "url": "https://github.com/your-username/nasa-space-biology-engine"
@@ -125,7 +51,6 @@
     "machine-learning",
     "data-visualization",
     "space-apps-challenge"
->>>>>>> e9be14db (Initial commit with all project files)
   ],
   "author": "NASA Space Apps Challenge Team",
   "license": "MIT"

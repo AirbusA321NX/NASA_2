@@ -810,11 +810,12 @@ async def process_osdr_data():
     global processing_status, publications_cache
     
     try:
-        api_key = os.getenv('MISTRAL_API_KEY')
-        
-        async with OSDADataProcessor(api_key=api_key) as processor:
+        # Use real OSDR processor only (no api_key parameter needed)
+        async with OSDADataProcessor() as processor:
             processing_status.message = "Processing OSDR data..."
-            publications = await processor.process_all_studies()
+            publications = await processor.process_all_studies(
+                output_path=str(Path("data/processed_publications.json"))
+            )
             
             if publications:
                 publications_cache = [
@@ -873,15 +874,18 @@ async def startup_event():
 if __name__ == "__main__":
     import uvicorn
     import sys
+    import os
     
     # Check if a port argument is provided
-    port = 8002  # default port
+    port = int(os.getenv('PORT', 8003))  # default port from env or 8003
+    host = os.getenv('HOST', '0.0.0.0')
+    
     if "--port" in sys.argv:
         try:
             port_index = sys.argv.index("--port") + 1
             if port_index < len(sys.argv):
                 port = int(sys.argv[port_index])
         except (ValueError, IndexError):
-            print("Invalid port specified, using default port 8002")
+            print("Invalid port specified, using default port from env or 8003")
     
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host=host, port=port)

@@ -53,13 +53,29 @@ router.post('/', [
       offset
     };
 
-    // For now, use mock data - in production this would fetch from NASA OSDR
-    const mockResults = await generateMockNASAPublications(query, limit);
-    const response = { data: { results: mockResults } };
+    // Fetch real NASA OSDR data
+    const DATA_PIPELINE_URL = process.env.DATA_PIPELINE_URL || 'http://localhost:8002';
+    const response = await fetch(`${DATA_PIPELINE_URL}/publications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        limit,
+        offset
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch NASA OSDR data: ${response.status}`);
+    }
+    
+    const responseData = await response.json();
 
     // Add search metadata
     const searchResults = {
-      ...response.data,
+      ...responseData.data,
       search_metadata: {
         query,
         filters: {
@@ -71,7 +87,7 @@ router.post('/', [
           }
         },
         timestamp: new Date().toISOString(),
-        execution_time: response.headers['x-response-time'] || 'N/A'
+        execution_time: responseData.headers?.['x-response-time'] || 'N/A'
       }
     };
 
@@ -114,7 +130,24 @@ router.get('/suggestions', async (req, res, next) => {
     }
 
     // Get publications for generating suggestions
-    const publications = await generateMockNASAPublications(q, 20);
+    const DATA_PIPELINE_URL = process.env.DATA_PIPELINE_URL || 'http://localhost:8002';
+    const response = await fetch(`${DATA_PIPELINE_URL}/publications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: q,
+        limit: 20
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch NASA OSDR data: ${response.status}`);
+    }
+    
+    const responseData = await response.json();
+    const publications = responseData.data?.results || [];
     
     // Extract suggestions from titles and keywords
     const suggestions = new Set();
@@ -210,8 +243,13 @@ router.post('/ai', [
       publications = await generateRealNASAPublications(uniqueGlds, query, limit * 2);
       
     } catch (osdrError) {
-      logger.warn(`OSDR fetch failed: ${osdrError.message}. Using fallback data.`);
-      publications = await generateMockNASAPublications(query, limit * 2);
+      logger.error(`OSDR fetch failed: ${osdrError.message}`);
+      // Return error instead of fallback data
+      return res.status(503).json({
+        success: false,
+        error: 'NASA OSDR data unavailable',
+        message: 'Failed to fetch real NASA OSDR data'
+      });
     }
     
     if (publications.length === 0) {
@@ -320,7 +358,8 @@ router.post('/ai', [
 router.get('/filters', async (req, res, next) => {
   try {
     // Get real data from NASA OSDR analytics instead of hardcoded values
-    const response = await fetch('http://localhost:4001/api/analytics/overview?period=all_time');
+    const DATA_PIPELINE_URL = process.env.DATA_PIPELINE_URL || 'http://localhost:8002';
+    const response = await fetch(`${DATA_PIPELINE_URL}/analytics/overview?period=all_time`);
     
     let stats = {};
     
@@ -390,8 +429,18 @@ router.post('/similar', [
     const { osdr_id, limit = 10 } = req.body;
 
     // First, get the target publication
-    const targetPubs = await generateMockNASAPublications(osdr_id, 1);
-    const targetPub = targetPubs[0];
+    const DATA_PIPELINE_URL = process.env.DATA_PIPELINE_URL || 'http://localhost:8002';
+    const targetResponse = await fetch(`${DATA_PIPELINE_URL}/publications/${osdr_id}`);
+    if (!targetResponse.ok) {
+      return res.status(404).json({
+        success: false,
+        error: 'Publication not found'
+      });
+    }
+    
+    const targetData = await targetResponse.json();
+    const targetPub = targetData.data;
+    
     if (!targetPub) {
       return res.status(404).json({
         success: false,
@@ -400,7 +449,22 @@ router.post('/similar', [
     }
 
     // Find similar publications based on research area and keywords
-    const allPubs = await generateMockNASAPublications('', 20);
+    const allResponse = await fetch(`${DATA_PIPELINE_URL}/publications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        limit: 20
+      })
+    });
+    
+    if (!allResponse.ok) {
+      throw new Error(`Failed to fetch NASA OSDR data: ${allResponse.status}`);
+    }
+    
+    const allData = await allResponse.json();
+    const allPubs = allData.data?.results || [];
     let similarPubs = allPubs.filter(pub => 
       pub.osdr_id !== osdr_id && 
       pub.research_area === targetPub.research_area
@@ -693,79 +757,6 @@ async function enhancePublicationWithAI(template, query) {
     };
   }
 }
-async function generateMockNASAPublications(query, limit) {
-  const nasaDatasets = [
-    {
-      osdr_id: 'GLDS-314',
-      title: 'Space Biology Research on Plant Growth in Microgravity Environment',
-      abstract: 'This study investigates the effects of microgravity on plant cell division and root development using Arabidopsis thaliana samples exposed to spaceflight conditions on the International Space Station. Results show significant changes in gene expression patterns related to gravitropic responses and cell wall biosynthesis.',
-      research_area: 'Plant Biology',
-      organisms: ['Arabidopsis thaliana'],
-      keywords: ['microgravity', 'plant biology', 'gene expression', 'spaceflight', 'cell division'],
-      principal_investigator: 'Dr. Sarah Johnson',
-      submission_date: '2023-06-15T00:00:00Z',
-      publication_date: '2023-08-20T00:00:00Z'
-    },
-    {
-      osdr_id: 'GLDS-298',
-      title: 'Radiation Effects on Human Cell Cultures During Extended Space Missions',
-      abstract: 'Analysis of DNA damage and repair mechanisms in human fibroblast cells exposed to galactic cosmic radiation simulating conditions during Mars missions. The study reveals enhanced oxidative stress responses and altered cell cycle progression.',
-      research_area: 'Human Research',
-      organisms: ['Homo sapiens'],
-      keywords: ['radiation biology', 'DNA damage', 'cosmic radiation', 'human cells', 'Mars mission'],
-      principal_investigator: 'Dr. Michael Chen',
-      submission_date: '2023-03-10T00:00:00Z',
-      publication_date: '2023-05-25T00:00:00Z'
-    },
-    {
-      osdr_id: 'GLDS-289',
-      title: 'Microbial Community Dynamics in Closed Space Habitation Systems',
-      abstract: 'Comprehensive metagenomic analysis of bacterial and fungal communities in sealed environment systems designed for long-duration space missions. Findings indicate specific microbiome changes that could impact crew health and system sustainability.',
-      research_area: 'Microbiology',
-      organisms: ['Mixed bacterial cultures', 'Aspergillus niger', 'Escherichia coli'],
-      keywords: ['microbiology', 'space habitation', 'microbiome', 'closed systems', 'crew health'],
-      principal_investigator: 'Dr. Lisa Rodriguez',
-      submission_date: '2023-01-20T00:00:00Z',
-      publication_date: '2023-04-08T00:00:00Z'
-    },
-    {
-      osdr_id: 'GLDS-312',
-      title: 'Bone Density Loss Mechanisms in Simulated Martian Gravity',
-      abstract: 'Investigation of osteoblast and osteoclast activity in mouse models under partial gravity conditions (0.38g) simulating Mars surface gravity. Results demonstrate accelerated bone resorption and decreased bone formation rates compared to Earth gravity controls.',
-      research_area: 'Musculoskeletal',
-      organisms: ['Mus musculus'],
-      keywords: ['bone density', 'Mars gravity', 'osteoblast', 'musculoskeletal', 'partial gravity'],
-      principal_investigator: 'Dr. Robert Kim',
-      submission_date: '2023-04-12T00:00:00Z',
-      publication_date: '2023-07-30T00:00:00Z'
-    },
-    {
-      osdr_id: 'GLDS-301',
-      title: 'Neural Plasticity Changes in Astronauts During Long-Duration Spaceflight',
-      abstract: 'Neuroimaging and cognitive assessment data from ISS crew members during 6-month missions, analyzing changes in brain connectivity, spatial orientation, and motor control. Significant adaptations in vestibular processing and visual-spatial integration were observed.',
-      research_area: 'Neuroscience',
-      organisms: ['Homo sapiens'],
-      keywords: ['neuroscience', 'brain plasticity', 'spaceflight', 'cognitive function', 'vestibular system'],
-      principal_investigator: 'Dr. Elena Petrov',
-      submission_date: '2023-02-28T00:00:00Z',
-      publication_date: '2023-06-15T00:00:00Z'
-    }
-  ];
-  
-  // Filter publications based on query if provided
-  let filteredData = nasaDatasets;
-  if (query && query.trim()) {
-    const queryLower = query.toLowerCase();
-    filteredData = nasaDatasets.filter(pub => 
-      pub.title.toLowerCase().includes(queryLower) ||
-      pub.abstract.toLowerCase().includes(queryLower) ||
-      pub.research_area.toLowerCase().includes(queryLower) ||
-      pub.keywords.some(k => k.toLowerCase().includes(queryLower)) ||
-      pub.organisms.some(o => o.toLowerCase().includes(queryLower))
-    );
-  }
-  
-  return filteredData.slice(0, limit);
-}
+
 
 module.exports = router;

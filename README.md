@@ -24,29 +24,28 @@ This application processes 608+ NASA bioscience publications from the Open Scien
 ### Backend
 - **Node.js** with Express
 - **Python** for data processing
-- **Neo4j** for knowledge graph database
+- **PostgreSQL** for database
 - **Redis** for caching
-- **Mistral AI** for document analysis
+- **Local AI Models** for document analysis (all-MiniLM-L6-v2, distilbert-base-uncased)
 
 ### Data Pipeline
 - **AWS S3** integration for OSDR data
-- **Apache Airflow** for data orchestration
 - **Pandas/NumPy** for data processing
 - **spaCy/NLTK** for NLP processing
+- **Sentence Transformers** for embeddings
 
 ## 🔧 Features
 
 ### Core Functionality
-- **Intelligent Search**: Semantic search across 608+ publications
+- **Intelligent Search**: Semantic search across NASA OSDR publications
 - **Knowledge Graph**: Interactive exploration of research relationships
-- **AI Summarization**: Automated research summaries using Mistral AI
+- **AI Summarization**: Automated research summaries using local AI models
 - **Gap Analysis**: Identification of research gaps and opportunities
 - **Visual Analytics**: Interactive charts and network visualizations
 
 ### Advanced Features
-- **Multi-modal Search**: Text, visual, and audio search capabilities
+- **Multi-modal Search**: Text and visual search capabilities
 - **Research Timeline**: Historical progression of space biology research
-- **Collaboration Tools**: Shared annotations and bookmarks
 - **Export Capabilities**: Data export in multiple formats
 
 ## 📁 Project Structure
@@ -56,10 +55,11 @@ nasa-space-biology-engine/
 ├── frontend/                 # Next.js frontend application
 ├── backend/                  # Node.js/Express API server
 ├── data-pipeline/           # Python data processing scripts
-├── ml-services/             # AI/ML microservices
-├── infrastructure/          # Docker, K8s, deployment configs
-├── docs/                    # Documentation
-└── tests/                   # Test suites
+├── embedding/               # AI embedding models
+├── kg_extraction/           # Knowledge graph extraction
+├── processing/              # Data processing utilities
+├── summarization/           # Text summarization modules
+└── vector_store/            # Vector database storage
 ```
 
 ## 🚀 Quick Start
@@ -67,8 +67,7 @@ nasa-space-biology-engine/
 ### Prerequisites
 - Node.js 18+
 - Python 3.9+
-- Docker & Docker Compose
-- Neo4j Database
+- npm 9+
 
 ### Installation
 
@@ -92,30 +91,52 @@ cd ../data-pipeline && pip install -r requirements.txt
 
 3. **Environment Setup**
 ```bash
+# Copy example environment files
 cp .env.example .env
+cp backend/.env.example backend/.env
 # Configure your environment variables
 ```
 
 4. **Start the application**
+
+#### Option 1: Using the PowerShell Script (Windows)
+```powershell
+# Run the startup script
+.\start_services.ps1
+```
+
+#### Option 2: Manual Start
+Start each service in a separate terminal:
+
 ```bash
-docker-compose up -d
+# Terminal 1: Start Data Pipeline
+cd data-pipeline
+python -m uvicorn main:app --host localhost --port 8003
+
+# Terminal 2: Start Backend
+cd backend
+npm run dev
+
+# Terminal 3: Start Frontend
+cd frontend
 npm run dev
 ```
+
+5. **Access the Application**
+Open your browser to http://localhost:3000
 
 ## 🔬 Data Sources
 
 - **NASA OSDR**: Primary bioscience publications and datasets
 - **NASA Space Life Sciences Library**: Additional relevant publications
 - **NASA Task Book**: Grant and funding information
-- **Supplementary Datasets**: Research metadata and experimental data
 
 ## 🤖 AI Integration
 
-### Mistral AI Agent
-- Document analysis and summarization
-- Research gap identification  
-- Hypothesis generation assistance
-- Semantic similarity analysis
+### Local AI Models
+- **all-MiniLM-L6-v2**: For semantic search and document similarity
+- **distilbert-base-uncased**: For text classification and entity extraction
+- **Sentence Transformers**: For generating embeddings
 
 ### Knowledge Extraction Pipeline
 1. **Document Processing**: PDF parsing and text extraction
@@ -153,19 +174,19 @@ npm run dev
 
 ### Backend Stack
 - Node.js, Express.js, TypeScript
-- Prisma ORM, PostgreSQL
-- Redis, Bull Queue
+- PostgreSQL
+- Redis
 - JWT authentication
 
 ### Data & AI Stack
 - Python, Pandas, NumPy
 - spaCy, NLTK, Transformers
-- Neo4j, Cypher queries
-- Mistral AI API integration
+- Sentence Transformers
+- FAISS for similarity search
 
 ### Infrastructure
 - Docker, Docker Compose
-- AWS S3, EC2, Lambda
+- AWS S3
 - GitHub Actions CI/CD
 - Vercel deployment
 
@@ -173,13 +194,13 @@ npm run dev
 
 ### Phase 1: Foundation (Current)
 - [x] Project setup and architecture
-- [ ] Data pipeline implementation
-- [ ] Basic web interface
+- [x] Data pipeline implementation
+- [x] Basic web interface
 
 ### Phase 2: Core Features
-- [ ] AI integration with Mistral
-- [ ] Knowledge graph construction
-- [ ] Search and visualization
+- [x] Local AI integration
+- [x] Knowledge graph construction
+- [x] Search and visualization
 
 ### Phase 3: Advanced Features
 - [ ] Multi-modal search
@@ -203,7 +224,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - NASA Open Science Data Repository team
 - 2025 NASA Space Apps Challenge organizers
-- Mistral AI for providing AI capabilities
 - Open source community contributors
 
 ---

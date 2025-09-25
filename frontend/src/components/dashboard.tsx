@@ -48,7 +48,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('http://localhost:4001/api/analytics?period=all_time')
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/analytics?period=all_time`)
         const data = await response.json()
         
         if (data.success && data.data) {
@@ -107,7 +107,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         setError(null);
         
         // Fetch recent publications
-        const pubResponse = await fetch('http://localhost:4001/api/publications?limit=5')
+        const pubResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/publications?limit=5`)
         const pubData = await pubResponse.json()
         
         if (pubData.success && pubData.data && pubData.data.publications) {
@@ -115,7 +115,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         }
         
         // Fetch research areas
-        const areasResponse = await fetch('http://localhost:4001/api/analytics')
+        const areasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/analytics`)
         const areasData = await areasResponse.json()
         
         if (areasData.success && areasData.data && areasData.data.research_areas?.top_10) {

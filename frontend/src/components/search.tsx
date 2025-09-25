@@ -22,15 +22,17 @@ export function Search({ onBack }: SearchProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Publication[]>([])
   const [loading, setLoading] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
   const [searchType, setSearchType] = useState<'semantic' | 'keyword'>('semantic')
 
   // Real Mistral AI-powered search function
   const performSearch = async (searchQuery: string) => {
     setLoading(true)
+    setAnalyzing(true)
     
     try {
       // Use the Mistral AI-powered search endpoint
-      const response = await fetch('http://localhost:4001/api/search/ai', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/search/ai`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +62,7 @@ export function Search({ onBack }: SearchProps) {
         authors: Array.isArray(result.authors) ? result.authors : 
                 result.principal_investigator ? [result.principal_investigator] : [],
         date: result.publication_date || result.submission_date || new Date().toISOString(),
-        source: 'NASA OSDR via Mistral AI',
+        source: 'NASA OSDR',
         tags: [
           ...(result.ai_keywords || result.keywords || []),
           result.research_area || result.study_type || 'Space Biology',
@@ -75,18 +77,22 @@ export function Search({ onBack }: SearchProps) {
       
       // Show AI enhancement status
       if (data.data.ai_enhanced) {
-        console.log(`✅ Mistral AI Enhanced Search - Model: ${data.data.model_used}`);
+        console.log(` AI Enhanced Search - Model: ${data.data.model_used}`);
       } else {
         console.log('⚠️ Fallback keyword search used');
       }
       
     } catch (error) {
-      console.error('Mistral AI search error:', error)
+      console.error('AI search error:', error)
       // Show error to user
       setResults([])
       alert(`Error with AI search: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
     } finally {
       setLoading(false)
+      // Simulate analysis time for better UX
+      setTimeout(() => {
+        setAnalyzing(false)
+      }, 800)
     }
   }
 
@@ -99,6 +105,20 @@ export function Search({ onBack }: SearchProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        .animate-pulse-custom {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -112,6 +132,26 @@ export function Search({ onBack }: SearchProps) {
           ← Back to Dashboard
         </button>
       </div>
+
+      {/* Loading Overlay */}
+      {analyzing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              {searchType === 'semantic' ? 'AI Analysis in Progress' : 'Searching Publications'}
+            </h3>
+            <p className="text-gray-300 mb-4">
+              {searchType === 'semantic' 
+                ? 'Analyzing publications with semantic AI...' 
+                : 'Scanning through NASA OSDR database...'}
+            </p>
+            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse-custom"></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search Form */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 mb-8">
@@ -150,7 +190,7 @@ export function Search({ onBack }: SearchProps) {
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
-              🧠 Semantic AI
+              Semantic AI
             </button>
             <button
               type="button"
@@ -161,17 +201,29 @@ export function Search({ onBack }: SearchProps) {
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
-              🔤 Keyword
+              Keyword
             </button>
           </div>
         </form>
       </div>
 
       {/* Search Results */}
-      {loading && (
+      {(loading || analyzing) && (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <p className="text-gray-300 mt-4">AI is analyzing publications...</p>
+          <p className="text-gray-300 mt-4">{analyzing ? 'AI is analyzing publications...' : 'Searching...'}</p>
+          {analyzing && (
+            <div className="mt-4 max-w-md mx-auto">
+              <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse-custom"></div>
+              </div>
+              <p className="text-gray-400 text-sm mt-2">
+                {searchType === 'semantic' 
+                  ? 'Processing with semantic AI analysis...' 
+                  : 'Scanning through NASA OSDR database...'}
+              </p>
+            </div>
+          )}
         </div>
       )}
 

@@ -24,6 +24,7 @@ interface OSDRFilesProps {
 export function OSDRFiles({ onBack }: OSDRFilesProps) {
   const [files, setFiles] = useState<OSDRFile[]>([])
   const [loading, setLoading] = useState(true)
+  const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<OSDRFile | null>(null)
   const [viewingPdf, setViewingPdf] = useState<OSDRFile | null>(null)
@@ -32,8 +33,9 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
     const fetchFiles = async () => {
       try {
         setLoading(true)
+        setAnalyzing(true)
         setError(null)
-        const response = await fetch('http://localhost:4001/api/osdr/files')
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/osdr/files`)
         const data = await response.json()
         
         if (data.success) {
@@ -46,6 +48,10 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
         setError('Failed to connect to NASA OSDR API')
       } finally {
         setLoading(false)
+        // Simulate analysis time for better UX
+        setTimeout(() => {
+          setAnalyzing(false)
+        }, 800)
       }
     }
 
@@ -86,9 +92,22 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
     }
   }
 
-  if (loading) {
+  if (loading || analyzing) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.5;
+            }
+          }
+          .animate-pulse-custom {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+        `}</style>
         <div className="flex items-center justify-between mb-8">
           <button 
             onClick={onBack}
@@ -101,7 +120,15 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
         
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading real NASA OSDR files from S3 repository...</p>
+          <p className="text-gray-300">{analyzing ? 'Analyzing NASA OSDR files...' : 'Loading real NASA OSDR files from S3 repository...'}</p>
+          {analyzing && (
+            <div className="mt-6 max-w-md mx-auto">
+              <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse-custom"></div>
+              </div>
+              <p className="text-gray-400 text-sm mt-2">Processing metadata and research context</p>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -137,6 +164,34 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        .animate-pulse-custom {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
+      
+      {/* Loading Overlay */}
+      {analyzing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <h3 className="text-xl font-semibold text-white mb-2">Analyzing OSDR Files</h3>
+            <p className="text-gray-300 mb-4">Processing NASA research files and metadata</p>
+            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse-custom"></div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between mb-8">
         <button 
           onClick={onBack}

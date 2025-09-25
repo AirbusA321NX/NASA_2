@@ -58,13 +58,11 @@ class OSDADataProcessor:
     Handles heterogeneous file formats and structures
     """
     
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key
+    def __init__(self):
         self.base_url = "http://nasa-osdr.s3-website-us-west-2.amazonaws.com"
         self.s3_bucket = "nasa-osdr"
         self.session = None
         self.nlp = None
-        self.mistral_client = None
         
         # Initialize NLP models
         self._initialize_nlp()
@@ -76,14 +74,6 @@ class OSDADataProcessor:
             self.nlp = spacy.load("en_core_web_sm")
         except OSError:
             logger.warning("spaCy model not found. Install with: python -m spacy download en_core_web_sm")
-            
-        # Initialize Mistral AI client if API key provided
-        if self.api_key:
-            try:
-                from mistralai import Mistral
-                self.mistral_client = Mistral(api_key=self.api_key)
-            except ImportError:
-                logger.warning("Mistral AI client not available. Install with: pip install mistralai")
 
     async def __aenter__(self):
         """Async context manager entry"""
@@ -579,26 +569,8 @@ class OSDADataProcessor:
         """
         Analyze text using Mistral AI
         """
-        if not self.mistral_client:
-            return ""
-            
-        prompts = {
-            "summarize": f"Summarize this scientific text focusing on key findings and methodology:\n\n{text[:2000]}",
-            "extract_keywords": f"Extract key scientific terms and concepts from this text:\n\n{text[:2000]}",
-            "identify_gaps": f"Identify potential research gaps or future directions mentioned in this text:\n\n{text[:2000]}"
-        }
-        
-        try:
-            response = self.mistral_client.chat.complete(
-                model="mistral-large-latest",
-                messages=[{"role": "user", "content": prompts.get(prompt_type, prompts["summarize"])}]
-            )
-            
-            return response.choices[0].message.content  # type: ignore[reportReturnType]
-            
-        except Exception as e:
-            logger.error(f"Error with Mistral AI analysis: {e}")
-            return ""
+        # Not using Mistral AI - return empty string
+        return ""
 
     async def process_study(self, study_data: Dict[str, Any]) -> Optional[Publication]:
         """
@@ -632,13 +604,9 @@ class OSDADataProcessor:
             full_text = f"{title}\n\n{description}"
             entities = self.extract_entities(full_text)
             
-            # AI analysis
+            # AI analysis (not using Mistral)
             ai_summary = ""
             keywords = []
-            if self.mistral_client:
-                ai_summary = await self.analyze_with_mistral(full_text, "summarize")
-                keywords_text = await self.analyze_with_mistral(full_text, "extract_keywords")
-                keywords = [k.strip() for k in keywords_text.split(',') if k.strip()]
             
             # Create publication object
             publication = Publication(
@@ -817,10 +785,8 @@ async def main():
     """
     Main function to run the data processing pipeline
     """
-    # Initialize processor
-    api_key = os.getenv('MISTRAL_API_KEY')
-    
-    async with OSDADataProcessor(api_key=api_key) as processor:
+    # Initialize processor (no api_key parameter needed)
+    async with OSDADataProcessor() as processor:
         publications = await processor.process_all_studies()
         
         # Generate summary statistics

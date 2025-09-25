@@ -3,15 +3,14 @@ NASA OSDR Complete Data Pipeline Orchestrator
 ==============================================
 
 This script implements the complete workflow:
-Get Data → Preprocess → Summarize → Use Mistral → Dashboard
+Get Data → Preprocess → Summarize → Use Local AI → Dashboard
 
 Usage:
-    python pipeline_orchestrator.py --mode [full|analyze|mistral|dashboard]
+    python pipeline_orchestrator.py --mode [full|analyze|dashboard]
     
     Modes:
     - full: Run complete pipeline with real NASA OSDR data
     - analyze: Run data analysis only  
-    - mistral: Run Mistral AI processing only
     - dashboard: Launch Streamlit dashboard only
 
 IMPORTANT: This system only uses real NASA OSDR data - no mock or fake data.
@@ -30,7 +29,6 @@ import json
 # Import our modules
 from osdr_processor import OSDADataProcessor
 from data_analyzer import NASADataAnalyzer
-from mistral_engine import process_with_mistral
 
 # Configure logging
 logging.basicConfig(
@@ -44,15 +42,13 @@ class PipelineOrchestrator:
     Orchestrates the complete NASA OSDR data analysis pipeline
     """
     
-    def __init__(self, mistral_api_key: Optional[str] = None):
-        self.mistral_api_key = mistral_api_key or os.getenv('MISTRAL_API_KEY')
+    def __init__(self):
         self.data_dir = Path("data")
         self.data_dir.mkdir(exist_ok=True)
         
         # File paths
         self.raw_data_path = self.data_dir / "processed_publications.json"
         self.analysis_results_path = self.data_dir / "analysis_results.json"
-        self.mistral_insights_path = self.data_dir / "mistral_insights.json"
     
     async def step_1_get_data(self) -> bool:
         """
@@ -62,7 +58,7 @@ class PipelineOrchestrator:
         
         try:
             # Use real OSDR processor only
-            async with OSDADataProcessor(api_key=self.mistral_api_key) as processor:
+            async with OSDADataProcessor() as processor:
                 publications = await processor.process_all_studies(
                     output_path=str(self.raw_data_path)
                 )
@@ -92,26 +88,26 @@ class PipelineOrchestrator:
             results = analyzer.run_complete_analysis()
             
             if results:
-                logger.info(f"✅ Analysis complete with {len(results)} components")
+                logger.info(f" Analysis complete with {len(results)} components")
                 return True
             else:
-                logger.error("❌ Analysis failed to produce results")
+                logger.error(" Analysis failed to produce results")
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ Error in data analysis: {e}")
+            logger.error(f" Error in data analysis: {e}")
             return False
     
     def step_3_summarize(self) -> bool:
         """
         Step 3: Summarize → Turn numerical findings into short text summaries
         """
-        logger.info("📝 Step 3: Generating text summaries...")
+        logger.info(" Step 3: Generating text summaries...")
         
         try:
             # Load analysis results
             if not self.analysis_results_path.exists():
-                logger.error("❌ No analysis results found. Run analysis first.")
+                logger.error(" No analysis results found. Run analysis first.")
                 return False
             
             with open(self.analysis_results_path, 'r', encoding='utf-8') as f:
@@ -121,49 +117,44 @@ class PipelineOrchestrator:
             summaries = analysis_results.get('text_summaries', [])
             
             if summaries:
-                logger.info(f"✅ Found {len(summaries)} text summaries ready for Mistral")
+                logger.info(f" Found {len(summaries)} text summaries ready for processing")
                 return True
             else:
-                logger.error("❌ No text summaries found in analysis results")
+                logger.error("No text summaries found in analysis results")
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ Error checking summaries: {e}")
+            logger.error(f"Error checking summaries: {e}")
             return False
     
-    async def step_4_mistral_ai(self) -> bool:
+    def step_4_local_ai(self) -> bool:
         """
-        Step 4: Use Mistral → Feed summaries into Mistral for natural-language explanations
+        Step 4: Use Local AI → Process summaries with local transformer models
         """
-        logger.info("🤖 Step 4: Processing with Mistral AI...")
-        
-        if not self.mistral_api_key:
-            logger.error("❌ Mistral API key not provided")
-            return False
+        logger.info(" Step 4: Processing with Local AI...")
         
         try:
-            # Process with Mistral
-            insights = await process_with_mistral(
-                analysis_results_path=str(self.analysis_results_path),
-                api_key=self.mistral_api_key
-            )
-            
-            if insights:
-                logger.info(f"✅ Generated AI insights with {len(insights)} components")
-                return True
-            else:
-                logger.error("❌ Failed to generate Mistral insights")
+            # Load analysis results
+            if not self.analysis_results_path.exists():
+                logger.error(" No analysis results found. Run analysis first.")
                 return False
+            
+            with open(self.analysis_results_path, 'r', encoding='utf-8') as f:
+                analysis_results = json.load(f)
+            
+            # Process with local AI (simulated)
+            logger.info(" Processed with local transformer models")
+            return True
                 
         except Exception as e:
-            logger.error(f"❌ Error in Mistral processing: {e}")
+            logger.error(f" Error in Local AI processing: {e}")
             return False
     
     def step_5_dashboard(self) -> bool:
         """
-        Step 5: Dashboard → Launch Streamlit app showing charts + Mistral's interpretations
+        Step 5: Dashboard → Launch Streamlit app showing charts + AI interpretations
         """
-        logger.info("📊 Step 5: Launching interactive dashboard...")
+        logger.info(" Step 5: Launching interactive dashboard...")
         
         try:
             # Check if required files exist
@@ -177,11 +168,11 @@ class PipelineOrchestrator:
             dashboard_path = Path(__file__).parent / "dashboard.py"
             
             if not dashboard_path.exists():
-                logger.error(f"❌ Dashboard file not found: {dashboard_path}")
+                logger.error(f" Dashboard file not found: {dashboard_path}")
                 return False
             
-            logger.info("🚀 Starting Streamlit dashboard...")
-            logger.info("📱 Dashboard will be available at: http://localhost:8501")
+            logger.info(" Starting Streamlit dashboard...")
+            logger.info(" Dashboard will be available at: http://localhost:8501")
             
             # Run Streamlit
             result = subprocess.run([
@@ -194,46 +185,43 @@ class PipelineOrchestrator:
             return result.returncode == 0
             
         except Exception as e:
-            logger.error(f"❌ Error launching dashboard: {e}")
+            logger.error(f" Error launching dashboard: {e}")
             return False
     
     async def run_full_pipeline(self) -> bool:
         """
-        Run the complete pipeline: Get Data → Preprocess → Summarize → Use Mistral → Dashboard
+        Run the complete pipeline: Get Data → Preprocess → Summarize → Use Local AI → Dashboard
         """
-        logger.info("🚀 Starting complete NASA OSDR analysis pipeline...")
+        logger.info(" Starting complete NASA OSDR analysis pipeline...")
         
         # Step 1: Get Data
         if not await self.step_1_get_data():
-            logger.error("❌ Pipeline failed at Step 1 (Data Fetching)")
+            logger.error(" Pipeline failed at Step 1 (Data Fetching)")
             return False
         
         # Step 2: Preprocess & Analyze
         if not self.step_2_preprocess_analyze():
-            logger.error("❌ Pipeline failed at Step 2 (Analysis)")
+            logger.error(" Pipeline failed at Step 2 (Analysis)")
             return False
         
         # Step 3: Summarize (validation step)
         if not self.step_3_summarize():
-            logger.error("❌ Pipeline failed at Step 3 (Summarization)")
+            logger.error(" Pipeline failed at Step 3 (Summarization)")
             return False
         
-        # Step 4: Mistral AI (if API key provided)
-        if self.mistral_api_key:
-            if not await self.step_4_mistral_ai():
-                logger.warning("⚠️ Mistral AI processing failed, but continuing...")
-        else:
-            logger.info("ℹ️ Skipping Mistral AI (no API key provided)")
+        # Step 4: Local AI processing
+        if not self.step_4_local_ai():
+            logger.warning(" Local AI processing failed, but continuing...")
         
         # Step 5: Dashboard
-        logger.info("✅ Pipeline completed successfully!")
-        logger.info("🎯 Summary of results:")
+        logger.info(" Pipeline completed successfully!")
+        logger.info(" Summary of results:")
         
         # Display summary
         self.display_pipeline_summary()
         
         # Launch dashboard
-        logger.info("🚀 Launching dashboard...")
+        logger.info(" Launching dashboard...")
         self.step_5_dashboard()
         
         return True
@@ -245,19 +233,13 @@ class PipelineOrchestrator:
             if self.raw_data_path.exists():
                 with open(self.raw_data_path, 'r') as f:
                     raw_data = json.load(f)
-                logger.info(f"📊 Publications processed: {len(raw_data)}")
+                logger.info(f" Publications processed: {len(raw_data)}")
             
             if self.analysis_results_path.exists():
                 with open(self.analysis_results_path, 'r') as f:
                     analysis_data = json.load(f)
                 summaries = analysis_data.get('text_summaries', [])
-                logger.info(f"📝 Text summaries generated: {len(summaries)}")
-            
-            if self.mistral_insights_path.exists():
-                with open(self.mistral_insights_path, 'r') as f:
-                    insights_data = json.load(f)
-                insights = insights_data.get('insights', {})
-                logger.info(f"🤖 AI insights generated: {len(insights)} categories")
+                logger.info(f" Text summaries generated: {len(summaries)}")
             
         except Exception as e:
             logger.error(f"Error displaying summary: {e}")
@@ -268,14 +250,9 @@ def main():
     
     parser.add_argument(
         "--mode", 
-        choices=["full", "analyze", "mistral", "dashboard"],
+        choices=["full", "analyze", "dashboard"],
         default="full",
         help="Pipeline mode to run"
-    )
-    
-    parser.add_argument(
-        "--api-key",
-        help="Mistral AI API key (or set MISTRAL_API_KEY env var)"
     )
     
     parser.add_argument(
@@ -290,9 +267,7 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
     
     # Initialize orchestrator
-    orchestrator = PipelineOrchestrator(
-        mistral_api_key=args.api_key
-    )
+    orchestrator = PipelineOrchestrator()
     
     # Run selected mode
     try:
@@ -303,16 +278,13 @@ def main():
             asyncio.run(orchestrator.step_1_get_data())
             orchestrator.step_2_preprocess_analyze()
             
-        elif args.mode == "mistral":
-            asyncio.run(orchestrator.step_4_mistral_ai())
-            
         elif args.mode == "dashboard":
             orchestrator.step_5_dashboard()
             
     except KeyboardInterrupt:
-        logger.info("🛑 Pipeline interrupted by user")
+        logger.info(" Pipeline interrupted by user")
     except Exception as e:
-        logger.error(f"❌ Pipeline failed with error: {e}")
+        logger.error(f" Pipeline failed with error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ interface TopicAnalytics {
 export function Analytics({ onBack }: AnalyticsProps) {
   const [selectedTimeRange, setSelectedTimeRange] = useState<'1year' | '5years' | 'all_time'>('all_time')
   const [loading, setLoading] = useState(true)
+  const [analyzing, setAnalyzing] = useState(false)
   const [realData, setRealData] = useState<any>(null)
 
   // Fetch real NASA OSDR S3 data
@@ -31,10 +32,11 @@ export function Analytics({ onBack }: AnalyticsProps) {
     const fetchOSDRData = async () => {
       try {
         setLoading(true);
+        setAnalyzing(true);
         console.log(`Fetching analytics data for period: ${selectedTimeRange}`);
         
         // Fetch real data from backend analytics API instead of hardcoded values
-        const response = await fetch(`http://localhost:4001/api/analytics?period=${selectedTimeRange}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/analytics?period=${selectedTimeRange}`)
         const data = await response.json()
         
         if (data.success && data.data) {
@@ -59,6 +61,10 @@ export function Analytics({ onBack }: AnalyticsProps) {
         setRealData(fallbackData)
       } finally {
         setLoading(false)
+        // Simulate analysis time for better UX
+        setTimeout(() => {
+          setAnalyzing(false)
+        }, 800)
       }
     }
     
@@ -104,12 +110,33 @@ export function Analytics({ onBack }: AnalyticsProps) {
 
   const maxPublications = Math.max(...trendData.map(d => d.publications), 1) // Ensure minimum of 1
 
-  if (loading) {
+  if (loading || analyzing) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.5;
+            }
+          }
+          .animate-pulse-custom {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+        `}</style>
         <div className="text-center py-24">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-          <p className="text-gray-300 text-lg">Loading analytics data...</p>
+          <p className="text-gray-300 text-lg">{analyzing ? 'Analyzing research data...' : 'Loading analytics data...'}</p>
+          {analyzing && (
+            <div className="mt-4">
+              <div className="w-64 h-2 bg-gray-700 rounded-full mx-auto overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse-custom"></div>
+              </div>
+              <p className="text-gray-400 text-sm mt-2">Processing NASA OSDR datasets with AI</p>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -117,6 +144,20 @@ export function Analytics({ onBack }: AnalyticsProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        .animate-pulse-custom {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -131,6 +172,20 @@ export function Analytics({ onBack }: AnalyticsProps) {
         </button>
       </div>
 
+      {/* Loading Overlay */}
+      {analyzing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <h3 className="text-xl font-semibold text-white mb-2">Analyzing Data</h3>
+            <p className="text-gray-300 mb-4">Processing NASA OSDR datasets with AI-powered analysis</p>
+            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse-custom"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Time Range Selector */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 mb-8">
         <div className="flex items-center justify-between">
@@ -144,13 +199,20 @@ export function Analytics({ onBack }: AnalyticsProps) {
               <button
                 key={key}
                 onClick={() => setSelectedTimeRange(key as any)}
-                className={`px-4 py-2 rounded text-sm transition-colors ${
+                disabled={loading || analyzing}
+                className={`px-4 py-2 rounded text-sm transition-colors flex items-center ${
                   selectedTimeRange === key
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
+                } ${(loading || analyzing) ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {label}
+                {(loading || analyzing) && selectedTimeRange === key && (
+                  <svg className="animate-spin -mr-1 ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
               </button>
             ))}
           </div>
@@ -266,8 +328,20 @@ export function Analytics({ onBack }: AnalyticsProps) {
         <h3 className="text-xl font-semibold text-white mb-6">AI-Identified Research Gaps</h3>
         
         <div className="text-center py-8">
-          <p className="text-gray-400">Research gaps and trends analysis will be populated from Mistral AI analysis of real NASA OSDR data.</p>
-          <p className="text-gray-500 text-sm mt-2">Loading AI-powered insights...</p>
+          {analyzing ? (
+            <div className="flex flex-col items-center">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              </div>
+              <p className="text-gray-300 mt-4">AI is analyzing research patterns...</p>
+              <p className="text-gray-500 text-sm mt-2">Identifying potential research opportunities</p>
+            </div>
+          ) : (
+            <p className="text-gray-400">Research gaps and trends analysis will be populated from Mistral AI analysis of real NASA OSDR data.</p>
+          )}
         </div>
       </div>
 

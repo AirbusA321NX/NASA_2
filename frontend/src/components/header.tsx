@@ -18,11 +18,17 @@ export function Header({ currentPage, onNavigate }: HeaderProps = {}) {
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-sm">NASA</span>
+              <div className="flex items-center justify-center">
+                <img
+                  src="/nasa_logo.png"
+                  alt="NASA Logo"
+                  width={60}
+                  height={60}
+                  className="bg-transparent"
+                />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent font-orbitron">
                   Space Biology Knowledge Engine
                 </h1>
                 <p className="text-xs text-gray-400">2025 Space Apps Challenge</p>
@@ -41,50 +47,45 @@ export function Header({ currentPage, onNavigate }: HeaderProps = {}) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg 
                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                          text-white placeholder-gray-400 text-sm transition-all duration-200"
+                          text-white placeholder-gray-400 text-sm transition-all duration-200 font-sans"
               />
             </div>
           </div>
 
           {/* Navigation */}
           <nav className="flex items-center space-x-6">
-            <button 
-              onClick={() => onNavigate?.('dashboard')} 
-              className={`transition-colors duration-200 text-sm font-medium ${
-                currentPage === 'dashboard' ? 'text-white' : 'text-gray-300 hover:text-white'
-              }`}
+            <button
+              onClick={() => onNavigate?.('dashboard')}
+              className={`transition-colors duration-200 text-sm font-medium font-orbitron ${currentPage === 'dashboard' ? 'text-white' : 'text-gray-300 hover:text-white'
+                }`}
             >
               Dashboard
             </button>
-            <button 
+            <button
               onClick={() => onNavigate?.('search')}
-              className={`transition-colors duration-200 text-sm font-medium ${
-                currentPage === 'search' ? 'text-white' : 'text-gray-300 hover:text-white'
-              }`}
+              className={`transition-colors duration-200 text-sm font-medium font-orbitron ${currentPage === 'search' ? 'text-white' : 'text-gray-300 hover:text-white'
+                }`}
             >
               Search
             </button>
-            <button 
+            <button
               onClick={() => onNavigate?.('knowledge-graph')}
-              className={`transition-colors duration-200 text-sm font-medium ${
-                currentPage === 'knowledge-graph' ? 'text-white' : 'text-gray-300 hover:text-white'
-              }`}
+              className={`transition-colors duration-200 text-sm font-medium font-orbitron ${currentPage === 'knowledge-graph' ? 'text-white' : 'text-gray-300 hover:text-white'
+                }`}
             >
               Knowledge Graph
             </button>
-            <button 
+            <button
               onClick={() => onNavigate?.('analytics')}
-              className={`transition-colors duration-200 text-sm font-medium ${
-                currentPage === 'analytics' ? 'text-white' : 'text-gray-300 hover:text-white'
-              }`}
+              className={`transition-colors duration-200 text-sm font-medium font-orbitron ${currentPage === 'analytics' ? 'text-white' : 'text-gray-300 hover:text-white'
+                }`}
             >
               Analytics
             </button>
-            <button 
+            <button
               onClick={() => onNavigate?.('osdr-files')}
-              className={`transition-colors duration-200 text-sm font-medium flex items-center ${
-                currentPage === 'osdr-files' ? 'text-white' : 'text-gray-300 hover:text-white'
-              }`}
+              className={`transition-colors duration-200 text-sm font-medium flex items-center font-orbitron ${currentPage === 'osdr-files' ? 'text-white' : 'text-gray-300 hover:text-white'
+                }`}
             >
               <FolderIcon className="h-4 w-4 mr-1" />
               Files

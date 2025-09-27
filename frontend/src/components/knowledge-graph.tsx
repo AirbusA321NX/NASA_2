@@ -30,7 +30,7 @@ interface KnowledgeGraphProps {
   onBack?: () => void
 }
 
-export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: KnowledgeGraphProps) {
+export function KnowledgeGraph({ data, width, height, onBack }: KnowledgeGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [graphData, setGraphData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -39,12 +39,37 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
 
   // Fetch real knowledge graph data from backend
   useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/health`, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        return response.ok;
+      } catch (error) {
+        console.warn('Backend health check failed:', error);
+        return false;
+      }
+    };
+
     const fetchKnowledgeGraphData = async () => {
       try {
         setLoading(true)
         setAnalyzing(true)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/knowledge-graph?limit=50&depth=3`)
-        
+
+        // First test connection
+        const isConnected = await testConnection();
+        if (!isConnected) {
+          console.warn('Backend service appears to be unavailable. Please ensure the backend is running on port 4001.');
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/knowledge-graph?limit=50&depth=3`, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache'
+        })
+
         if (response.ok) {
           const result = await response.json()
           if (result.success && result.data && result.data.graph) {
@@ -59,6 +84,10 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
         }
       } catch (error) {
         console.warn('Failed to fetch knowledge graph data:', error)
+        // Log more detailed error information
+        if (error instanceof TypeError) {
+          console.warn('This is likely a network connectivity issue. Please check if the backend service is running on port 4001.')
+        }
         setGraphData(getMinimalGraphStructure())
       } finally {
         setLoading(false)
@@ -68,7 +97,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
         }, 1000)
       }
     }
-    
+
     if (data) {
       setGraphData(data)
       setLoading(false)
@@ -76,7 +105,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
       fetchKnowledgeGraphData()
     }
   }, [data])
-  
+
   // Minimal graph structure for when no real data is available
   const getMinimalGraphStructure = () => {
     return {
@@ -110,6 +139,10 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
+
+    // Get the actual dimensions of the SVG container
+    const containerWidth = svgRef.current.clientWidth || width || 1200
+    const containerHeight = svgRef.current.clientHeight || height || 800
 
     // Create color scale for different node types
     const colorScale = d3.scaleOrdinal()
@@ -158,7 +191,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
           const sourceNode = d.source as GraphNode;
           const targetNode = d.target as GraphNode;
           const levelFactor = (sourceNode.level || 0) + (targetNode.level || 0) + 1;
-          
+
           // Different distances for different relationship types
           switch ((d as GraphEdge).type) {
             case 'contains': return 150 + (levelFactor * 50);
@@ -174,13 +207,13 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
         const level = (d as GraphNode).level || 0;
         return -400 - (level * 150);
       }))
-      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('center', d3.forceCenter(containerWidth / 2, containerHeight / 2))
       .force('collision', d3.forceCollide<GraphNode>()
         .radius((d) => sizeScale(nodeConnections.get(d.id) || 1) + 20)
         .strength(0.9)
       )
-      .force('x', d3.forceX(width / 2).strength(0.1))
-      .force('y', d3.forceY(height / 2).strength(0.1))
+      .force('x', d3.forceX(containerWidth / 2).strength(0.1))
+      .force('y', d3.forceY(containerHeight / 2).strength(0.1))
 
     // Create zoom behavior
     const zoom = d3.zoom()
@@ -302,7 +335,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
 
     // Add hover effects
     nodes
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         const node = d as GraphNode;
         d3.select(this)
           .transition()
@@ -316,7 +349,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
         // Show tooltip
         showTooltip(event, node)
       })
-      .on('mouseout', function(event, d) {
+      .on('mouseout', function (event, d) {
         const node = d as GraphNode;
         d3.select(this)
           .transition()
@@ -341,7 +374,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
 
         hideTooltip()
       })
-      .on('click', function(event, d) {
+      .on('click', function (event, d) {
         const node = d as GraphNode;
         // Toggle expansion for study nodes
         if (node.type === 'study') {
@@ -395,16 +428,16 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
         .filter((d) => (d as GraphEdge).source === nodeId || (d as GraphEdge).target === nodeId)
         .attr('stroke-opacity', 1)
         .attr('stroke-width', (d) => (Math.sqrt((d as GraphEdge).weight || 1) * 2) + 2)
-      
+
       // Highlight connected nodes
       nodes
         .filter((d) => {
           const node = d as GraphNode;
-          return node.id === nodeId || 
-                 edges.some((e: GraphEdge) => 
-                   (e.source === nodeId && e.target === node.id) || 
-                   (e.target === nodeId && e.source === node.id)
-                 );
+          return node.id === nodeId ||
+            edges.some((e: GraphEdge) =>
+              (e.source === nodeId && e.target === node.id) ||
+              (e.target === nodeId && e.source === node.id)
+            );
         })
         .attr('stroke', '#FFFFFF')
         .attr('stroke-width', 3)
@@ -415,7 +448,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
       links
         .attr('stroke-opacity', 0.6)
         .attr('stroke-width', (d) => Math.sqrt((d as GraphEdge).weight || 1) * 2)
-      
+
       nodes
         .attr('stroke', (d) => {
           // Special stroke for study nodes
@@ -437,7 +470,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
     function showTooltip(event: MouseEvent, d: GraphNode) {
       // Remove any existing tooltips
       d3.selectAll('.graph-tooltip').remove();
-      
+
       const tooltip = d3.select('body')
         .append('div')
         .attr('class', 'graph-tooltip')
@@ -550,37 +583,32 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-        .animate-pulse-custom {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-      `}</style>
-      
+    <div className="w-full bg-gray-900 flex flex-col h-[calc(100vh-150px)]">
       {/* Header */}
-      {onBack && (
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Knowledge Graph</h1>
-            <p className="text-gray-300">Explore interconnected relationships in space biology research</p>
-          </div>
-          <button 
-            onClick={onBack}
-            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            ← Back to Dashboard
-          </button>
+      <div className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700 p-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white font-orbitron">Knowledge Graph Explorer</h1>
+          <p className="text-gray-300 text-sm">Interactive visualization of NASA space biology research connections</p>
         </div>
-      )}
-      
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-300">
+            {graphData && (
+              <span>
+                {graphData.nodes.length} nodes, {graphData.edges.length} connections
+              </span>
+            )}
+          </div>
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors font-orbitron"
+            >
+              ← Back to Dashboard
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Loading Overlay */}
       {analyzing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -594,13 +622,13 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
           </div>
         </div>
       )}
-      
-      <div className="knowledge-graph relative bg-gray-800/30 rounded-lg p-4">
+
+      <div className="knowledge-graph relative bg-gray-800/30 rounded-lg p-4 flex-1 overflow-hidden">
         <svg
           ref={svgRef}
-          width={width}
-          height={height}
-          className="border border-gray-600 rounded-lg bg-gray-900"
+          width="100%"
+          height="100%"
+          className="border border-gray-600 rounded-lg bg-gray-900 w-full h-full"
         >
         </svg>
         {/* Legend */}
@@ -640,7 +668,7 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
               <span className="text-gray-300">Files</span>
             </div>
           </div>
-          
+
           <h4 className="font-semibold mb-2 mt-3 text-white">Relationship Types</h4>
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
@@ -668,12 +696,12 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
           </div>
         </div>
       </div>
-      
+
       {/* Info Panel */}
       <div className="mt-6 bg-gray-800/50 rounded-lg p-4">
         <h3 className="text-lg font-semibold text-white mb-2">About this Visualization</h3>
         <p className="text-gray-300 text-sm">
-          This knowledge graph shows relationships between NASA OSDR studies, their associated files, and related research. 
+          This knowledge graph shows relationships between NASA OSDR studies, their associated files, and related research.
           Studies are connected to their files, and publications are linked to research areas, organisms, and keywords.
           Drag nodes to reposition them, scroll to zoom, and click on nodes for more details. Click on study nodes to expand and see their associated files.
         </p>
@@ -681,3 +709,5 @@ export function KnowledgeGraph({ data, width = 1200, height = 800, onBack }: Kno
     </div>
   )
 }
+
+export default KnowledgeGraph

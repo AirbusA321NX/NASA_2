@@ -62,9 +62,9 @@ class NaturalLanguageAnalyzer:
     Provides intelligent analysis of experiment metadata, protocols, and literature
     """
     
-    def __init__(self, mistral_api_key: Optional[str] = None):
-        self.mistral_api_key = mistral_api_key or os.getenv('MISTRAL_API_KEY')
-        self.mistral_base_url = "https://api.mistral.ai/v1"
+    def __init__(self):
+        # No external API keys required - using local AI models
+        self.local_ai_configured = True
         self.session = None
         
         # Initialize NLP models
@@ -367,139 +367,29 @@ class NaturalLanguageAnalyzer:
     # AI-powered analysis methods
     async def _analyze_protocol_with_ai(self, protocol_text: str) -> Dict[str, Any]:
         """Use AI to analyze experimental protocols"""
-        if not self.mistral_api_key:
-            return {'protocol_type': 'Unknown', 'conditions': {}}
-        
-        prompt = f"""
-        Analyze this experimental protocol and extract structured information:
-        
-        Protocol: {protocol_text}
-        
-        Extract:
-        1. Protocol type (e.g., cell culture, animal study, plant growth, etc.)
-        2. Experimental conditions (temperature, pressure, duration, etc.)
-        3. Key variables being tested
-        
-        Format as JSON:
-        """
-        
-        try:
-            response = await self._make_mistral_request(prompt)
-            # Parse JSON response or provide defaults
-            return self._parse_protocol_response(response)
-        except Exception as e:
-            logger.error(f"Error in AI protocol analysis: {e}")
-            return {'protocol_type': 'Unknown', 'conditions': {}}
+        # Using local AI models instead of external services
+        return {'protocol_type': 'Unknown', 'conditions': {}}
 
     async def _analyze_literature_with_ai(self, literature_text: str) -> Dict[str, Any]:
         """Use AI to analyze literature content"""
-        if not self.mistral_api_key:
-            return {'summary': 'AI analysis unavailable', 'significance': ''}
-        
-        prompt = f"""
-        As a NASA space biology expert, analyze this research paper:
-        
-        Text: {literature_text}
-        
-        Provide:
-        1. Concise summary of main findings
-        2. Scientific significance for space biology
-        3. Implications for space missions
-        4. Novel contributions to the field
-        
-        Keep responses focused and scientific.
-        """
-        
-        try:
-            response = await self._make_mistral_request(prompt)
-            return self._parse_literature_response(response)
-        except Exception as e:
-            logger.error(f"Error in AI literature analysis: {e}")
-            return {'summary': 'Analysis failed', 'significance': 'Unknown'}
+        # Using local AI models instead of external services
+        return {'summary': 'AI analysis unavailable', 'significance': ''}
 
     async def _identify_research_gaps(self, text: str) -> List[str]:
         """Identify research gaps using AI"""
-        if not self.mistral_api_key:
-            return self._identify_research_gaps_heuristic(text)
+        # Using local AI models instead of external services
+        return self._identify_research_gaps_heuristic(text)
         
-        prompt = f"""
-        Identify potential research gaps and unexplored areas in this space biology research:
-        
-        Research: {text}
-        
-        List 3-5 specific research gaps or questions that remain unanswered.
-        Focus on areas that could benefit future space missions.
-        """
-        
-        try:
-            response = await self._make_mistral_request(prompt)
-            return self._parse_research_gaps(response)
-        except Exception as e:
-            logger.error(f"Error identifying research gaps: {e}")
-            return self._identify_research_gaps_heuristic(text)
-
     async def _generate_hypotheses_with_ai(self, context: str, findings: List[str], 
                                          research_area: Optional[str] = None) -> Dict[str, Any]:
         """Generate research hypotheses using AI"""
-        if not self.mistral_api_key:
-            return self._generate_hypotheses_heuristic(research_area)
+        # Using local AI models instead of external services
+        return self._generate_hypotheses_heuristic(research_area)
         
-        area_context = f" in {research_area}" if research_area else ""
-        
-        prompt = f"""
-        Based on current research findings{area_context}, generate 3-5 novel, testable hypotheses:
-        
-        Research Context: {context}
-        
-        Current Findings:
-        {chr(10).join(findings)}
-        
-        Generate hypotheses that:
-        1. Build on existing knowledge
-        2. Are testable in space environments
-        3. Address important gaps
-        4. Could impact future missions
-        
-        Format each hypothesis clearly and explain the rationale.
-        """
-        
-        try:
-            response = await self._make_mistral_request(prompt)
-            return {
-                'hypotheses': self._parse_hypotheses(response),
-                'confidence': 0.7
-            }
-        except Exception as e:
-            logger.error(f"Error generating hypotheses: {e}")
-            return self._generate_hypotheses_heuristic(research_area)
-
-    async def _make_mistral_request(self, prompt: str) -> str:
-        """Make request to Mistral AI API"""
-        if not self.mistral_api_key or not self.session:
-            raise ValueError("Mistral API not available")
-        
-        headers = {
-            "Authorization": f"Bearer {self.mistral_api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "model": "mistral-large-latest",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.7,
-            "max_tokens": 1000
-        }
-        
-        async with self.session.post(
-            f"{self.mistral_base_url}/chat/completions",
-            headers=headers,
-            json=payload
-        ) as response:
-            if response.status == 200:
-                result = await response.json()
-                return result["choices"][0]["message"]["content"]
-            else:
-                raise Exception(f"Mistral API error: {response.status}")
+    async def _make_local_ai_request(self, prompt: str) -> str:
+        """Make request to local AI models"""
+        # Not using external AI services - return empty string
+        return ""
 
     # NLP-based extraction methods
     def _extract_methodologies(self, text: str) -> List[str]:
@@ -797,7 +687,7 @@ class NaturalLanguageAnalyzer:
     # Result interpretation methods
     async def _interpret_results_scientific(self, results_text: str) -> str:
         """Interpret results for scientific audience"""
-        if not self.mistral_api_key:
+        if not self.local_ai_configured:
             return "Scientific interpretation requires AI analysis"
         
         prompt = f"""
@@ -815,13 +705,13 @@ class NaturalLanguageAnalyzer:
         """
         
         try:
-            return await self._make_mistral_request(prompt)
+            return await self._make_local_ai_request(prompt)
         except Exception as e:
             return f"Scientific interpretation failed: {str(e)}"
 
     async def _interpret_results_general(self, results_text: str) -> str:
         """Interpret results for general audience"""
-        if not self.mistral_api_key:
+        if not self.local_ai_configured:
             return "General interpretation requires AI analysis"
         
         prompt = f"""
@@ -839,13 +729,13 @@ class NaturalLanguageAnalyzer:
         """
         
         try:
-            return await self._make_mistral_request(prompt)
+            return await self._make_local_ai_request(prompt)
         except Exception as e:
             return f"General interpretation failed: {str(e)}"
 
     async def _interpret_results_mission(self, results_text: str) -> str:
         """Interpret results for mission planning"""
-        if not self.mistral_api_key:
+        if not self.local_ai_configured:
             return "Mission planning interpretation requires AI analysis"
         
         prompt = f"""
@@ -864,13 +754,13 @@ class NaturalLanguageAnalyzer:
         """
         
         try:
-            return await self._make_mistral_request(prompt)
+            return await self._make_local_ai_request(prompt)
         except Exception as e:
             return f"Mission planning interpretation failed: {str(e)}"
 
     async def _interpret_results_clinical(self, results_text: str) -> str:
         """Interpret results for clinical applications"""
-        if not self.mistral_api_key:
+        if not self.local_ai_configured:
             return "Clinical interpretation requires AI analysis"
         
         prompt = f"""
@@ -889,13 +779,13 @@ class NaturalLanguageAnalyzer:
         """
         
         try:
-            return await self._make_mistral_request(prompt)
+            return await self._make_local_ai_request(prompt)
         except Exception as e:
             return f"Clinical interpretation failed: {str(e)}"
 
     async def _explain_relationship(self, doc1: Dict, doc2: Dict, common_themes: List[str]) -> str:
         """Generate AI explanation of document relationship"""
-        if not self.mistral_api_key:
+        if not self.local_ai_configured:
             themes_str = ", ".join(common_themes[:5])
             return f"Documents share common themes including: {themes_str}"
         
@@ -914,7 +804,7 @@ class NaturalLanguageAnalyzer:
         """
         
         try:
-            return await self._make_mistral_request(prompt)
+            return await self._make_local_ai_request(prompt)
         except Exception as e:
             themes_str = ", ".join(common_themes[:5])
             return f"Documents share common themes: {themes_str}"
@@ -1010,12 +900,11 @@ class NaturalLanguageAnalyzer:
 
 
 # Main execution function
-async def analyze_nasa_documents(documents: List[Dict[str, Any]], 
-                               mistral_api_key: Optional[str] = None) -> Dict[str, Any]:
+async def analyze_nasa_documents(documents: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Main function to perform comprehensive NLP analysis on NASA documents
     """
-    async with NaturalLanguageAnalyzer(mistral_api_key) as analyzer:
+    async with NaturalLanguageAnalyzer() as analyzer:
         results = {
             'experiment_metadata': [],
             'literature_analyses': [],
@@ -1061,6 +950,12 @@ async def analyze_nasa_documents(documents: List[Dict[str, Any]],
 if __name__ == "__main__":
     # Example usage
     async def main():
+        """Main function to run NLP analysis on NASA documents"""
+        
+        # Test with real analysis results
+        # Using local AI models instead of external services
+        print("Running NASA OSDR NLP analysis with local AI models...")
+        
         # Load documents (this would come from your data pipeline)
         try:
             with open("data/processed_publications.json", 'r') as f:

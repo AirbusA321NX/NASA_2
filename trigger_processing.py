@@ -13,9 +13,9 @@ async def main():
     
     try:
         # Initialize processor
-        api_key = os.getenv('MISTRAL_API_KEY')
+        # No external API keys required - using local AI models
         
-        async with OSDADataProcessor(api_key=api_key) as processor:
+        async with OSDADataProcessor() as processor:
             print("Fetching real NASA OSDR data from S3 repository...")
             publications = await processor.process_all_studies()
             

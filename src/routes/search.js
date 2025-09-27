@@ -1,3 +1,4 @@
+const express = require('express');
 const axios = require('axios');
 const { body, validationResult } = require('express-validator');
 const logger = require('../utils/logger');
@@ -606,7 +607,7 @@ function calculateSimilarityScore(targetPub, candidatePub) {
   return Math.min(1.0, score);
 }
 
-// Generate real NASA OSDR publications with comprehensive Mistral AI analysis
+// Generate real NASA OSDR publications with comprehensive local AI analysis
 async function generateRealNASAPublications(gldsIds, query, limit) {
   const realPublications = [];
   
@@ -638,7 +639,7 @@ async function generateRealNASAPublications(gldsIds, query, limit) {
     }
   };
   
-  // Process each GLDS ID with Mistral AI enhancement
+  // Process each GLDS ID with local AI enhancement
   for (const gldsId of gldsIds.slice(0, limit)) {
     try {
       const template = gldsTemplates[gldsId] || {
@@ -650,7 +651,7 @@ async function generateRealNASAPublications(gldsIds, query, limit) {
         principal_investigator: 'NASA GeneLab Team'
       };
       
-      // Use Mistral AI to enhance the publication data
+      // Use local AI to enhance the publication data
       const aiEnhanced = await enhancePublicationWithAI(template, query);
       
       const publication = {
@@ -701,14 +702,14 @@ async function generateRealNASAPublications(gldsIds, query, limit) {
   return filteredData;
 }
 
-// Enhance publication data using Mistral AI for ALL aspects
+// Enhance publication data using local AI for ALL aspects
 async function enhancePublicationWithAI(template, query) {
   try {
-    // Check if Mistral AI is available
+    // Check if local AI is available
     const aiAvailable = await localAI.isAvailable();
     
     if (!aiAvailable) {
-      logger.warn('Mistral AI not available, using template data');
+      logger.warn('local AI not available, using template data');
       return {
         title: template.title,
         abstract: template.base_abstract,
@@ -716,7 +717,7 @@ async function enhancePublicationWithAI(template, query) {
       };
     }
     
-    // Use Mistral AI to generate enhanced abstract
+    // Use local AI to generate enhanced abstract
     const abstractPrompt = `As a space biology expert, enhance this research abstract to be more detailed and scientifically accurate. 
     Base abstract: ${template.base_abstract}
     Research area: ${template.research_area}
@@ -727,7 +728,7 @@ async function enhancePublicationWithAI(template, query) {
     
     const enhancedAbstractResponse = await localAI.makeRequest(abstractPrompt, 0.7);
     
-    // Use Mistral AI to generate relevant keywords
+    // Use local AI to generate relevant keywords
     const keywordPrompt = `Extract 8-10 highly relevant scientific keywords from this space biology research:
     Title: ${template.title}
     Abstract: ${enhancedAbstractResponse.content}

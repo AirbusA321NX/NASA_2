@@ -27,12 +27,7 @@
           "value": "https://your-backend-url.com"
         }
       ],
-      "secrets": [
-        {
-          "name": "NEXT_PUBLIC_MISTRAL_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:YOUR_ACCOUNT_ID:secret:nasa/mistral-api-key"
-        }
-      ],
+      "secrets": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {

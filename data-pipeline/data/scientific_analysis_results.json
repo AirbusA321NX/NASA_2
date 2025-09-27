@@ -1,0 +1,381 @@
+{
+  "analysis_timestamp": "2025-09-26T23:46:54.293633",
+  "total_studies_analyzed": 5,
+  "successfully_processed_studies": 5,
+  "processing_success_rate": 1.0,
+  "data_type_distribution": {
+    "gene_expression": 10,
+    "unknown": 6
+  },
+  "file_type_distribution": {
+    "microarray_data": 10,
+    "generic_data": 6
+  },
+  "data_category_distribution": {
+    "other": 16
+  },
+  "key_scientific_insights": [
+    "Space biology related terms: flight, source, accession, number",
+    "Key scientific terms identified: REF, Age at, PK",
+    "Total scientific data volume: 11.17 MB across 10 files",
+    "Study organisms: Mus musculus",
+    "Microarray data present in 10 files, supporting genome-wide expression studies",
+    "Study description: Real space biology research from NASA OSDR: OSD-101...",
+    "Total scientific data volume: 0.08 MB across 1 files",
+    "Primary research focus area identified: Plant Sciences",
+    "Study description: Real space biology research from NASA OSDR: OSD-103...",
+    "Total scientific data volume: 0.14 MB across 2 files",
+    "Gene expression data identified in 10 files, indicating transcriptomic analysis",
+    "Study organisms: Homo sapiens",
+    "Key scientific terms identified: ID, PDF, EOF",
+    "Key scientific terms identified: PDF, PK, ID, REF, RNA, EOF, DNA",
+    "Study organisms: Drosophila melanogaster",
+    "Study description: Real space biology research from NASA OSDR: OSD-102...",
+    "Total scientific data volume: 0.16 MB across 2 files",
+    "Key scientific terms identified: PDF, PK, PrepEase, ID, REF, EOF, DNA",
+    "Identified research themes: Plant Biology",
+    "Study description: Real space biology research from NASA OSDR: OSD-1...",
+    "Primary research focus area identified: Human Physiology",
+    "Study organisms: Saccharomyces cerevisiae",
+    "Primary research focus area identified: Cell Biology",
+    "Study description: Real space biology research from NASA OSDR: OSD-100...",
+    "Space biology related terms: iss, parameter, protocol, value[library",
+    "Total scientific data volume: 0.10 MB across 1 files"
+  ],
+  "study_level_analyses": [
+    {
+      "study_id": "OSD-1",
+      "total_files_sampled": 10,
+      "successfully_processed": 10,
+      "processing_success_rate": 1.0,
+      "total_data_size_bytes": 11716517,
+      "file_type_distribution": {
+        "microarray_data": 10
+      },
+      "data_category_distribution": {
+        "other": 10
+      },
+      "data_type_distribution": {
+        "gene_expression": 10
+      },
+      "sample_file_analyses": [
+        {
+          "file_type": "microarray_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-1/version-6/array/GLDS-1_array_Dmel_OR_wo_FLT_infdw-Bbas_Rep1_GSM1287106_raw.CEL.gz",
+          "size_bytes": 2252236,
+          "data_type": "gene_expression",
+          "format": "affymetrix",
+          "glds_study_id": "1",
+          "version": "1",
+          "data_category": "other"
+        },
+        {
+          "file_type": "microarray_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-1/version-6/array/GLDS-1_array_Dmel_OR_wo_FLT_infdw-Bbas_Rep1_GSM1287106_raw.txt.gz",
+          "size_bytes": 130717,
+          "data_type": "gene_expression",
+          "format": "text",
+          "glds_study_id": "1",
+          "version": "1",
+          "data_category": "other"
+        },
+        {
+          "file_type": "microarray_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-1/version-6/array/GLDS-1_array_Dmel_OR_wo_FLT_infdw-Bbas_Rep2_GSM1287107_raw.CEL.gz",
+          "size_bytes": 2362991,
+          "data_type": "gene_expression",
+          "format": "affymetrix",
+          "glds_study_id": "1",
+          "version": "1",
+          "data_category": "other"
+        },
+        {
+          "file_type": "microarray_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-1/version-6/array/GLDS-1_array_Dmel_OR_wo_FLT_infdw-Bbas_Rep2_GSM1287107_raw.txt.gz",
+          "size_bytes": 130875,
+          "data_type": "gene_expression",
+          "format": "text",
+          "glds_study_id": "1",
+          "version": "1",
+          "data_category": "other"
+        },
+        {
+          "file_type": "microarray_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-1/version-6/array/GLDS-1_array_Dmel_OR_wo_FLT_infdw-Bbas_Rep3_GSM1287108_raw.CEL.gz",
+          "size_bytes": 2258201,
+          "data_type": "gene_expression",
+          "format": "affymetrix",
+          "glds_study_id": "1",
+          "version": "1",
+          "data_category": "other"
+        }
+      ],
+      "scientific_insights": [
+        "Gene expression data identified in 10 files, indicating transcriptomic analysis",
+        "Microarray data present in 10 files, supporting genome-wide expression studies",
+        "Total scientific data volume: 11.17 MB across 10 files",
+        "Study description: Real space biology research from NASA OSDR: OSD-1...",
+        "Study organisms: Drosophila melanogaster"
+      ]
+    },
+    {
+      "study_id": "OSD-100",
+      "total_files_sampled": 10,
+      "successfully_processed": 2,
+      "processing_success_rate": 0.2,
+      "total_data_size_bytes": 145986,
+      "file_type_distribution": {
+        "generic_data": 2
+      },
+      "data_category_distribution": {
+        "other": 2
+      },
+      "data_type_distribution": {
+        "unknown": 2
+      },
+      "sample_file_analyses": [
+        {
+          "file_type": "generic_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-100/version-5/design/OSD-100_design_RR1ExpDesign.pdf",
+          "size_bytes": 84602,
+          "file_extension": "pdf",
+          "sample_content": "%PDF-1.5\r%\r\n250 0 obj\r<</Linearized 1/L 84602/O 252/E 76403/N 1/T 84261/H [ 531 209]>>\rendobj\r                \r\n271 0 obj\r<</DecodeParms<</Columns 5/Predictor 12>>/Filter/FlateDecode/ID[<ACB386AA1786A34E816B06C003874831><D9B01343262F114C9A33816408A3A2E4>]/Index[250 53]/Info 249 0 R/Length 104/Prev 84262/Root 251 0 R/Size 303/Type/XRef/W[1 3 1]>>stream\r\nhbbd`\u0010``b``\u0002\"\u0019I\u000f\u0010\u0000\"Y\\@$3/X<0\u0011.\u0006\u00020y\u0018W\u0019DrE١ Ҥ\u001b^\u0017D\u0016\b&@1\u0004H\tN8Pǐ!30=\u0006\b0\u0000V\u000e\r\nendstream\rendobj\rstartxref\r\n0\r\n%%EOF\r\n                          \r\n302 0 ob",
+          "content_length": 47969,
+          "extracted_scientific_terms": [
+            "LE",
+            "XO",
+            "VO",
+            "NPJ",
+            "EO",
+            "VYY",
+            "JU",
+            "Ce\u001fmp",
+            "DEE",
+            "NO"
+          ],
+          "research_focus": "Plant Sciences",
+          "osdr_study_id": "100",
+          "version": "100",
+          "data_category": "other"
+        },
+        {
+          "file_type": "generic_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-100/version-5/metadata/OSD-100_metadata_OSD-100-ISA.zip",
+          "size_bytes": 61384,
+          "file_extension": "zip",
+          "sample_content": "PK\u0003\u0004\u0014\u0000\u0000\u0000\u0000\u0000V*p\tk\n\u000e\u0000\u0000\n\u000e\u0000\u0000I\u0000\u0000\u0000a_OSD-100_dna-methylation-profiling_whole-genome-bisulfite-sequencing.txtSample Name\tComment[Processed Tissue Weight (mg)]\tProtocol REF\tExtract Name\tComment[Extraction Method]\tProtocol REF\tParameter Value[library strategy]\tParameter Value[library selection]\tParameter Value[library layout]\tProtocol REF\tParameter Value[sequencing instrument]\tAssay Name\tRaw Data File\nMmus_C57-6J_EYE_GC_Rep1_M33\t15.3\tnucleic acid extraction\tRR1_GC_M33_EYE_DNA\tAllPrep DNA/RNA Mini Kit\tDNA s",
+          "content_length": 61323,
+          "extracted_scientific_terms": [
+            "The current",
+            "increase",
+            "Processing scripts",
+            "Concentration and",
+            "MESH",
+            "Age at",
+            "Archive and",
+            "WA",
+            "Intact carcass",
+            "The supernatant"
+          ],
+          "extracted_key_findings": [
+            "scientific value for spaceflight research"
+          ],
+          "research_focus": "Cell Biology",
+          "osdr_study_id": "100",
+          "version": "100",
+          "data_category": "other"
+        }
+      ],
+      "scientific_insights": [
+        "Total scientific data volume: 0.14 MB across 2 files",
+        "Identified research themes: Plant Biology",
+        "Key scientific terms identified: PDF, PK, ID, REF, RNA, EOF, DNA",
+        "Primary research focus area identified: Cell Biology",
+        "Space biology related terms: iss, parameter, protocol, value[library",
+        "Study description: Real space biology research from NASA OSDR: OSD-100...",
+        "Study organisms: Drosophila melanogaster"
+      ]
+    },
+    {
+      "study_id": "OSD-101",
+      "total_files_sampled": 10,
+      "successfully_processed": 1,
+      "processing_success_rate": 0.1,
+      "total_data_size_bytes": 99967,
+      "file_type_distribution": {
+        "generic_data": 1
+      },
+      "data_category_distribution": {
+        "other": 1
+      },
+      "data_type_distribution": {
+        "unknown": 1
+      },
+      "sample_file_analyses": [
+        {
+          "file_type": "generic_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-101/version-10/metadata/OSD-101_metadata_OSD-101-ISA.zip",
+          "size_bytes": 99967,
+          "file_extension": "zip",
+          "sample_content": "PK\u0003\u0004\u0014\u0000\u0000\u0000\u0000\u0000qbZ\u001az\u0010\u0011:\u0000\u0000\u0011:\u0000\u0000\r\u0000\u0000\u0000s_OSD-101.txtSource Name\tSample Name\tCharacteristics[Organism]\tTerm Source REF\tTerm Accession Number\tCharacteristics[Strain]\tTerm Source REF\tTerm Accession Number\tCharacteristics[Animal Source]\tCharacteristics[Sex]\tTerm Source REF\tTerm Accession Number\tCharacteristics[Age at Launch]\tUnit\tTerm Source REF\tTerm Accession Number\tCharacteristics[Material Type]\tTerm Source REF\tTerm Accession Number\tFactor Value[Spaceflight]\tTerm Source REF\tTerm Accession Number\tProtocol REF",
+          "content_length": 99908,
+          "extracted_scientific_terms": [
+            "The current",
+            "Purified library",
+            "NCI",
+            "increase",
+            "Roles\tconceptualization",
+            "Concentration and",
+            "MESH",
+            "Age at",
+            "Archive and",
+            "Raw fastq"
+          ],
+          "extracted_key_findings": [
+            "scientific value for spaceflight research"
+          ],
+          "research_focus": "Cell Biology",
+          "osdr_study_id": "101",
+          "version": "101",
+          "data_category": "other"
+        }
+      ],
+      "scientific_insights": [
+        "Total scientific data volume: 0.10 MB across 1 files",
+        "Key scientific terms identified: REF, Age at, PK",
+        "Primary research focus area identified: Human Physiology",
+        "Space biology related terms: flight, source, accession, number",
+        "Study description: Real space biology research from NASA OSDR: OSD-101...",
+        "Study organisms: Homo sapiens"
+      ]
+    },
+    {
+      "study_id": "OSD-102",
+      "total_files_sampled": 10,
+      "successfully_processed": 1,
+      "processing_success_rate": 0.1,
+      "total_data_size_bytes": 84602,
+      "file_type_distribution": {
+        "generic_data": 1
+      },
+      "data_category_distribution": {
+        "other": 1
+      },
+      "data_type_distribution": {
+        "unknown": 1
+      },
+      "sample_file_analyses": [
+        {
+          "file_type": "generic_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-102/version-5/design/OSD-102_design_RR1ExpDesign.pdf",
+          "size_bytes": 84602,
+          "file_extension": "pdf",
+          "sample_content": "%PDF-1.5\r%\r\n250 0 obj\r<</Linearized 1/L 84602/O 252/E 76403/N 1/T 84261/H [ 531 209]>>\rendobj\r                \r\n271 0 obj\r<</DecodeParms<</Columns 5/Predictor 12>>/Filter/FlateDecode/ID[<ACB386AA1786A34E816B06C003874831><D9B01343262F114C9A33816408A3A2E4>]/Index[250 53]/Info 249 0 R/Length 104/Prev 84262/Root 251 0 R/Size 303/Type/XRef/W[1 3 1]>>stream\r\nhbbd`\u0010``b``\u0002\"\u0019I\u000f\u0010\u0000\"Y\\@$3/X<0\u0011.\u0006\u00020y\u0018W\u0019DrE١ Ҥ\u001b^\u0017D\u0016\b&@1\u0004H\tN8Pǐ!30=\u0006\b0\u0000V\u000e\r\nendstream\rendobj\rstartxref\r\n0\r\n%%EOF\r\n                          \r\n302 0 ob",
+          "content_length": 47969,
+          "extracted_scientific_terms": [
+            "LE",
+            "XO",
+            "VO",
+            "NPJ",
+            "EO",
+            "VYY",
+            "JU",
+            "Ce\u001fmp",
+            "DEE",
+            "NO"
+          ],
+          "research_focus": "Plant Sciences",
+          "osdr_study_id": "102",
+          "version": "102",
+          "data_category": "other"
+        }
+      ],
+      "scientific_insights": [
+        "Total scientific data volume: 0.08 MB across 1 files",
+        "Identified research themes: Plant Biology",
+        "Key scientific terms identified: ID, PDF, EOF",
+        "Primary research focus area identified: Plant Sciences",
+        "Study description: Real space biology research from NASA OSDR: OSD-102...",
+        "Study organisms: Mus musculus"
+      ]
+    },
+    {
+      "study_id": "OSD-103",
+      "total_files_sampled": 10,
+      "successfully_processed": 2,
+      "processing_success_rate": 0.2,
+      "total_data_size_bytes": 164788,
+      "file_type_distribution": {
+        "generic_data": 2
+      },
+      "data_category_distribution": {
+        "other": 2
+      },
+      "data_type_distribution": {
+        "unknown": 2
+      },
+      "sample_file_analyses": [
+        {
+          "file_type": "generic_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-103/version-5/design/OSD-103_design_RR1ExpDesign.pdf",
+          "size_bytes": 84602,
+          "file_extension": "pdf",
+          "sample_content": "%PDF-1.5\r%\r\n250 0 obj\r<</Linearized 1/L 84602/O 252/E 76403/N 1/T 84261/H [ 531 209]>>\rendobj\r                \r\n271 0 obj\r<</DecodeParms<</Columns 5/Predictor 12>>/Filter/FlateDecode/ID[<ACB386AA1786A34E816B06C003874831><D9B01343262F114C9A33816408A3A2E4>]/Index[250 53]/Info 249 0 R/Length 104/Prev 84262/Root 251 0 R/Size 303/Type/XRef/W[1 3 1]>>stream\r\nhbbd`\u0010``b``\u0002\"\u0019I\u000f\u0010\u0000\"Y\\@$3/X<0\u0011.\u0006\u00020y\u0018W\u0019DrE١ Ҥ\u001b^\u0017D\u0016\b&@1\u0004H\tN8Pǐ!30=\u0006\b0\u0000V\u000e\r\nendstream\rendobj\rstartxref\r\n0\r\n%%EOF\r\n                          \r\n302 0 ob",
+          "content_length": 47969,
+          "extracted_scientific_terms": [
+            "LE",
+            "XO",
+            "VO",
+            "NPJ",
+            "EO",
+            "VYY",
+            "JU",
+            "Ce\u001fmp",
+            "DEE",
+            "NO"
+          ],
+          "research_focus": "Plant Sciences",
+          "osdr_study_id": "103",
+          "version": "103",
+          "data_category": "other"
+        },
+        {
+          "file_type": "generic_data",
+          "filename": "https://nasa-osdr.s3.amazonaws.com/OSD-103/version-5/metadata/OSD-103_metadata_OSD-103-ISA.zip",
+          "size_bytes": 80186,
+          "file_extension": "zip",
+          "sample_content": "PK\u0003\u0004\u0014\u0000\u0000\u0000\u0000\u0000V9= \"\u000e\u0000\u0000\"\u000e\u0000\u0000I\u0000\u0000\u0000a_OSD-103_dna-methylation-profiling_whole-genome-bisulfite-sequencing.txtSample Name\tComment[Processed Tissue Weight (mg)]\tProtocol REF\tExtract Name\tComment[Extraction Method]\tProtocol REF\tParameter Value[library strategy]\tParameter Value[library selection]\tParameter Value[library layout]\tProtocol REF\tParameter Value[sequencing instrument]\tAssay Name\tRaw Data File\nMmus_C57-6J_Quad_FLT_Rep1_M23\t36.2\tnucleic acid extraction\tRR1_FLT_M23_QDR_DNA\tPrepEase Genomic DNA Isolati",
+          "content_length": 80107,
+          "extracted_scientific_terms": [
+            "The current",
+            "Purified library",
+            "Processing scripts",
+            "increase",
+            "Concentration and",
+            "MESH",
+            "Age at",
+            "Archive and",
+            "WA",
+            "Raw fastq"
+          ],
+          "extracted_key_findings": [
+            "scientific value for spaceflight research"
+          ],
+          "research_focus": "Cell Biology",
+          "osdr_study_id": "103",
+          "version": "103",
+          "data_category": "other"
+        }
+      ],
+      "scientific_insights": [
+        "Total scientific data volume: 0.16 MB across 2 files",
+        "Identified research themes: Plant Biology",
+        "Key scientific terms identified: PDF, PK, PrepEase, ID, REF, EOF, DNA",
+        "Primary research focus area identified: Cell Biology",
+        "Space biology related terms: iss, parameter, protocol, value[library",
+        "Study description: Real space biology research from NASA OSDR: OSD-103...",
+        "Study organisms: Saccharomyces cerevisiae"
+      ]
+    }
+  ]
+}

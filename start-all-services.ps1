@@ -5,7 +5,7 @@ Write-Host "🚀 Starting NASA Space Biology Knowledge Engine Services..." -Fore
 
 # Start Data Pipeline (Python/FastAPI) in background
 Write-Host "Starting Data Pipeline (FastAPI)..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$(Get-Location)\data-pipeline'; python main.py" -WindowStyle Minimized
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$(Get-Location)\data-pipeline'; python -m uvicorn main:app --host localhost --port 8003" -WindowStyle Minimized
 
 # Wait a moment for the data pipeline to start
 Start-Sleep -Seconds 5
@@ -23,6 +23,8 @@ Set-Location frontend
 npm run dev
 
 Write-Host "✅ All services started successfully!" -ForegroundColor Green
-Write-Host "Frontend: http://localhost:3000" -ForegroundColor Blue
-Write-Host "Backend API: http://localhost:4001" -ForegroundColor Blue
-Write-Host "Data Pipeline: http://localhost:8002" -ForegroundColor Blue
+Write-Host "Frontend Dashboard: http://localhost:3000" -ForegroundColor Blue
+Write-Host "Backend API: http://localhost:3001" -ForegroundColor Blue
+Write-Host "Data Pipeline API: http://localhost:8003" -ForegroundColor Blue
+Write-Host "" -ForegroundColor Blue
+Write-Host "Advanced visualizations are available through the Analytics section of the dashboard." -ForegroundColor Blue

@@ -17,7 +17,7 @@ aws configure
 # 3. Initialize and deploy
 eb init nasa-space-biology --platform "Node.js 18" --region us-east-1
 eb create nasa-dashboard-prod --cname nasa-space-biology
-eb setenv MISTRAL_API_KEY=your-key NODE_ENV=production
+eb setenv NODE_ENV=production
 
 # Your app will be at: https://nasa-space-biology.elasticbeanstalk.com
 

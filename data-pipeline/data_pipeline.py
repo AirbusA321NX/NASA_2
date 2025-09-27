@@ -125,6 +125,26 @@ class DataPipeline:
                 return url
         return None
 
+    def _convert_to_datetime(self, date_string: Optional[str]) -> Optional[datetime]:
+        """
+        Convert string to datetime object safely
+        """
+        if not date_string or not isinstance(date_string, str):
+            return None
+        
+        try:
+            # Handle different datetime formats
+            if 'Z' in date_string:
+                return datetime.fromisoformat(date_string.replace('Z', '+00:00'))
+            elif date_string.endswith('+00:00'):
+                return datetime.fromisoformat(date_string)
+            else:
+                # Try parsing as naive datetime
+                return datetime.fromisoformat(date_string)
+        except ValueError:
+            # If parsing fails, return None
+            return None
+
     async def extract_and_normalize_nslsl_data(self, query: str = "space biology", 
                                              max_records: int = 1000) -> List[Dict[str, Any]]:
         """
@@ -200,33 +220,72 @@ class DataPipeline:
         paper_ids = []
         
         async with self.pool.acquire() as conn:
-            async with conn.transaction():
-                for pub in publications:
-                    try:
+            for pub in publications:
+                try:
+                    # Use a separate transaction for each publication to avoid transaction failures
+                    async with conn.transaction():
+                        # Handle empty DOI values
+                        doi = pub.get('doi')
+                        if not doi or doi.strip() == '':
+                            doi = None  # Set to None instead of empty string
+                        
                         # Insert publication and get paper_id
-                        paper_id = await conn.fetchval('''
-                            INSERT INTO publications (
-                                title, authors, year, doi, osd_id, nslsl_id, 
-                                pdf_url, licences, abstract, keywords, publication_date
-                            ) VALUES (
-                                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
-                            )
-                            ON CONFLICT (doi) DO UPDATE SET
-                                title = EXCLUDED.title,
-                                updated_at = CURRENT_TIMESTAMP
-                            RETURNING paper_id
-                        ''', 
-                        pub.get('title', ''),
-                        json.dumps(pub.get('authors', [])),
-                        pub.get('year'),
-                        pub.get('doi'),
-                        pub.get('osd_id'),
-                        pub.get('nslsl_id'),
-                        pub.get('pdf_url'),
-                        json.dumps(pub.get('licences', [])),
-                        pub.get('abstract', ''),
-                        json.dumps(pub.get('keywords', [])),
-                        pub.get('publication_date'))
+                        if doi is not None:
+                            # Use ON CONFLICT for publications with DOI
+                            paper_id = await conn.fetchval('''
+                                INSERT INTO publications (
+                                    title, authors, year, doi, osd_id, nslsl_id, 
+                                    pdf_url, licences, abstract, keywords, publication_date
+                                ) VALUES (
+                                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+                                )
+                                ON CONFLICT (doi) DO UPDATE SET
+                                    title = EXCLUDED.title,
+                                    authors = EXCLUDED.authors,
+                                    year = EXCLUDED.year,
+                                    osd_id = EXCLUDED.osd_id,
+                                    nslsl_id = EXCLUDED.nslsl_id,
+                                    pdf_url = EXCLUDED.pdf_url,
+                                    licences = EXCLUDED.licences,
+                                    abstract = EXCLUDED.abstract,
+                                    keywords = EXCLUDED.keywords,
+                                    publication_date = EXCLUDED.publication_date,
+                                    updated_at = CURRENT_TIMESTAMP
+                                RETURNING paper_id
+                            ''', 
+                            pub.get('title', ''),
+                            json.dumps(pub.get('authors', [])),
+                            pub.get('year'),
+                            doi,
+                            pub.get('osd_id'),
+                            pub.get('nslsl_id'),
+                            pub.get('pdf_url'),
+                            json.dumps(pub.get('licences', [])),
+                            pub.get('abstract', ''),
+                            json.dumps(pub.get('keywords', [])),
+                            self._convert_to_datetime(pub.get('publication_date')))
+                        else:
+                            # For publications without DOI, insert without ON CONFLICT
+                            paper_id = await conn.fetchval('''
+                                INSERT INTO publications (
+                                    title, authors, year, doi, osd_id, nslsl_id, 
+                                    pdf_url, licences, abstract, keywords, publication_date
+                                ) VALUES (
+                                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+                                )
+                                RETURNING paper_id
+                            ''', 
+                            pub.get('title', ''),
+                            json.dumps(pub.get('authors', [])),
+                            pub.get('year'),
+                            doi,
+                            pub.get('osd_id'),
+                            pub.get('nslsl_id'),
+                            pub.get('pdf_url'),
+                            json.dumps(pub.get('licences', [])),
+                            pub.get('abstract', ''),
+                            json.dumps(pub.get('keywords', [])),
+                            self._convert_to_datetime(pub.get('publication_date')))
                         
                         paper_ids.append(str(paper_id))
                         
@@ -246,10 +305,10 @@ class DataPipeline:
                         
                         logger.debug(f"Saved publication: {pub.get('title', '')[:50]}...")
                         
-                    except Exception as e:
-                        logger.error(f"Error saving publication '{pub.get('title', '')[:50]}...': {e}")
-                        # Continue with other publications rather than failing completely
-                        continue
+                except Exception as e:
+                    logger.error(f"Error saving publication '{pub.get('title', '')[:50]}...': {e}")
+                    # Continue with other publications rather than failing completely
+                    continue
         
         logger.info(f"Successfully saved {len(paper_ids)} publications to database")
         return paper_ids
@@ -314,10 +373,10 @@ async def main():
     # Database configuration
     db_config = {
         'host': os.getenv('DB_HOST', 'localhost'),
-        'port': os.getenv('DB_PORT', '5432'),
+        'port': int(os.getenv('DB_PORT', '5432')),
         'user': os.getenv('DB_USER', 'postgres'),
-        'password': os.getenv('DB_PASSWORD', 'password'),
-        'database': os.getenv('DB_NAME', 'nasa_space_biology')
+        'password': os.getenv('DB_PASSWORD', '1234'),
+        'database': os.getenv('DB_NAME', 'nasa_biology')
     }
     
     async with DataPipeline(db_config) as pipeline:

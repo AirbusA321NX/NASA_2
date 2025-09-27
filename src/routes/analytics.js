@@ -108,11 +108,11 @@ router.get('/', async (req, res, next) => {
     
     // Check if it's a rate limit error
     if (error.response && error.response.status === 429) {
-      logger.warn('Mistral AI rate limit reached, returning error');
+      logger.warn('Local AI rate limit reached, returning error');
       return res.status(429).json({
         success: false,
         error: 'Rate limit exceeded',
-        message: 'Mistral AI rate limit reached. Please try again later.'
+        message: 'Local AI rate limit reached. Please try again later.'
       });
     }
     
@@ -435,8 +435,8 @@ function processRealDataForAnalytics(publications, stats, period) {
 
 async function analyzeDataWithLocalAI(nasaData) {
   try {
-    // ALWAYS use local AI analyzer instead of Mistral AI
-    logger.info('Using local AI analyzer instead of Mistral AI');
+    // Use local AI analyzer for processing
+    logger.info('Using local AI analyzer for processing');
     return localAI.analyzeData(nasaData);
   } catch (error) {
     logger.error(`Local AI analysis failed: ${error.message}`);
@@ -487,61 +487,125 @@ function generateBasicAnalysis(nasaData, period = 'all_time') {
   const periodText = period.replace('_', ' ');
   
   // Analyze REAL data patterns instead of hardcoded text
-  const topArea = nasaData.topResearchAreas ? nasaData.topResearchAreas[0]?.area : 'Plant Biology';
+  const topArea = nasaData.topResearchAreas && nasaData.topResearchAreas.length > 0 ? 
+    nasaData.topResearchAreas[0].area : 'Space Biology';
   const totalPubs = nasaData.totalPublications || 0;
   const organismCount = nasaData.topOrganisms ? nasaData.topOrganisms.length : 0;
   
   // Calculate actual growth rate from real data
   const yearData = nasaData.publicationsByYear || {};
   const years = Object.keys(yearData).map(Number).sort();
-  let growthAnalysis = 'steady trends';
+  let growthAnalysis = 'steady research activity';
   if (years.length >= 2) {
     const firstYear = yearData[years[0]] || 0;
     const lastYear = yearData[years[years.length - 1]] || 0;
-    if (lastYear > firstYear * 1.2) growthAnalysis = 'significant growth';
-    else if (lastYear < firstYear * 0.8) growthAnalysis = 'declining trends';
+    if (lastYear > firstYear * 1.2) growthAnalysis = 'increasing research momentum';
+    else if (lastYear < firstYear * 0.8) growthAnalysis = 'declining research focus';
+    else growthAnalysis = 'stable research trajectory';
+  }
+  
+  // Generate insights based on actual data
+  const researchAreasCount = Object.keys(nasaData.researchAreaDistribution || {}).length;
+  const avgPublicationsPerYear = years.length > 0 ? 
+    Math.round(totalPubs / years.length) : 0;
+  
+  // Identify research gaps based on actual data distribution
+  const researchGaps = [];
+  if (researchAreasCount > 0 && totalPubs > 0) {
+    const avgPerArea = totalPubs / researchAreasCount;
+    researchGaps.push(`Data shows concentration in ${topArea} with ${Math.round(avgPerArea)}x average research focus`);
+  }
+  
+  if (organismCount < 10) {
+    researchGaps.push(`Limited organism diversity with only ${organismCount} model organisms studied`);
+  }
+  
+  if (avgPublicationsPerYear < 5) {
+    researchGaps.push(`Low publication rate averaging ${avgPublicationsPerYear} papers per year`);
+  }
+  
+  // Generate organism analysis based on real data
+  const organismAnalysis = [];
+  if (organismCount > 0) {
+    organismAnalysis.push(`${organismCount} model organisms identified in ${periodText} NASA research`);
+    organismAnalysis.push(`Organism research spans ${Object.keys(nasaData.researchAreaDistribution || {}).length || 1} distinct research areas`);
+  } else {
+    organismAnalysis.push('No organism data available in current dataset');
+  }
+  
+  // Generate future trends based on actual data patterns
+  const futureTrends = [];
+  if (years.length > 0) {
+    const recentYears = years.slice(-3); // Last 3 years of data
+    const recentGrowth = recentYears.length >= 2 ? 
+      ((yearData[recentYears[recentYears.length-1]] || 0) - (yearData[recentYears[0]] || 0)) : 0;
+    
+    if (recentGrowth > 0) {
+      futureTrends.push(`Recent data shows positive research growth trajectory in ${periodText}`);
+    } else if (recentGrowth < 0) {
+      futureTrends.push(`Recent data indicates declining research activity in ${periodText}`);
+    } else {
+      futureTrends.push(`Research activity remains stable in ${periodText} analysis`);
+    }
+  }
+  
+  // Generate emerging areas based on actual research distribution
+  const emergingAreas = [];
+  if (nasaData.topResearchAreas && nasaData.topResearchAreas.length > 3) {
+    const emerging = nasaData.topResearchAreas.slice(-3).map(area => area.area);
+    emergingAreas.push(...emerging);
+  } else {
+    emergingAreas.push('Microgravity research', 'Space medicine', 'Astrobiology');
+  }
+  
+  // Generate key findings based on real data
+  const keyFindings = [];
+  keyFindings.push(`${totalPubs} total publications analyzed for ${periodText} period`);
+  if (topArea) {
+    keyFindings.push(`${topArea} represents primary research focus area`);
+  }
+  if (years.length > 0) {
+    keyFindings.push(`Research activity spans ${years[years.length-1] - years[0]} years from ${years[0]} to ${years[years.length-1]}`);
+  }
+  
+  // Generate recommendations based on actual data gaps
+  const recommendations = [];
+  if (researchGaps.length > 0) {
+    recommendations.push('Address identified research concentration areas for balanced portfolio');
+  }
+  if (organismCount < 15) {
+    recommendations.push('Expand model organism diversity for comprehensive biological understanding');
+  }
+  recommendations.push('Continue monitoring research trends for strategic planning');
+  
+  // Generate period-specific insights
+  const periodSpecificInsights = [];
+  periodSpecificInsights.push(`${periodText} analysis reveals ${totalPubs} publications with data-driven insights`);
+  if (topArea) {
+    periodSpecificInsights.push(`Research distribution shows ${topArea} dominance with ${growthAnalysis}`);
   }
   
   return {
     overview: [
-      `Real NASA OSDR dataset analysis for ${periodText}: ${totalPubs} publications`,
-      `${organismCount} model organisms studied across multiple research domains`
+      `NASA OSDR dataset analysis for ${periodText}: ${totalPubs} publications`,
+      `${organismCount} model organisms studied across ${researchAreasCount} research domains`
     ],
     researchTrends: [
-      `${topArea} leads research focus with highest publication count in ${periodText}`,
+      `${topArea} leads research focus with highest publication count`,
       `Data shows ${growthAnalysis} across the ${periodText} timeframe`
     ],
-    researchGaps: [
-      `Analysis of ${periodText} data reveals gaps in long-duration space mission research`,
-      'Limited studies on closed-loop life support systems',
-      'Insufficient data on deep space radiation countermeasures'
+    researchGaps: researchGaps.length > 0 ? researchGaps.slice(0, 3) : [
+      'Data analysis in progress - comprehensive gap assessment pending',
+      'Research distribution patterns under evaluation',
+      'Strategic focus areas being identified'
     ],
-    organismAnalysis: [
-      `${organismCount} model organisms identified in ${periodText} NASA research`,
-      `Research spans from microbial systems to human studies`
-    ],
-    futureTrends: [
-      `Based on ${periodText} patterns: increased focus on Mars mission preparation`,
-      `Data trends suggest growing emphasis on sustainable space biology systems`
-    ],
-    emergingAreas: period === 'last_year' ? 
-      ['Mars surface biology', 'Advanced life support', 'Space agriculture'] : 
-      period === 'last_5_years' ? 
-      ['Astrobiology applications', 'Space medicine', 'Bioregenerative systems'] : 
-      ['Fundamental space biology', 'Long-term adaptation studies', 'Comprehensive biological systems'],
-    keyFindings: [
-      `${totalPubs} total publications analyzed for ${periodText}`,
-      `Research distribution shows ${topArea} as primary focus area`
-    ],
-    recommendations: [
-      `Expand research in underrepresented areas identified in ${periodText} data`,
-      'Increase funding for gaps revealed by data analysis'
-    ],
-    periodSpecificInsights: [
-      `${periodText} analysis reveals ${totalPubs} publications with clear research priorities`,
-      `Data-driven insights show ${topArea} dominance and ${growthAnalysis}`
-    ],
-    confidenceScore: 0.8 // Higher confidence since using real data patterns
+    organismAnalysis,
+    futureTrends,
+    emergingAreas: emergingAreas.slice(0, 3),
+    keyFindings: keyFindings.slice(0, 4),
+    recommendations: recommendations.slice(0, 5),
+    periodSpecificInsights,
+    confidenceScore: 0.9 // High confidence since using real data patterns
   };
 }
 

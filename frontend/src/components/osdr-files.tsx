@@ -28,6 +28,10 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<OSDRFile | null>(null)
   const [viewingPdf, setViewingPdf] = useState<OSDRFile | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalFiles, setTotalFiles] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const filesPerPage = 50
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -37,9 +41,11 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
         setError(null)
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/osdr/files`)
         const data = await response.json()
-        
+
         if (data.success) {
-          setFiles(data.files || [])
+          setFiles(data.data || [])
+          setTotalFiles(data.total || data.data?.length || 0)
+          setHasMore(data.total > (data.data?.length || 0))
         } else {
           setError(data.error || 'Failed to fetch OSDR files')
         }
@@ -109,7 +115,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
           }
         `}</style>
         <div className="flex items-center justify-between mb-8">
-          <button 
+          <button
             onClick={onBack}
             className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
           >
@@ -117,7 +123,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
           </button>
           <h2 className="text-3xl font-bold text-white">NASA OSDR Files</h2>
         </div>
-        
+
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-300">{analyzing ? 'Analyzing NASA OSDR files...' : 'Loading real NASA OSDR files from S3 repository...'}</p>
@@ -138,7 +144,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
-          <button 
+          <button
             onClick={onBack}
             className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
           >
@@ -146,12 +152,12 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
           </button>
           <h2 className="text-3xl font-bold text-white">NASA OSDR Files</h2>
         </div>
-        
+
         <div className="bg-red-900/30 border border-red-700 rounded-lg p-6 text-center">
           <div className="text-red-400 text-2xl mb-2">⚠️</div>
           <h3 className="text-xl font-semibold text-red-300 mb-2">Error Loading Files</h3>
           <p className="text-red-200 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-red-700 hover:bg-red-600 rounded-md transition-colors"
           >
@@ -177,7 +183,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
-      
+
       {/* Loading Overlay */}
       {analyzing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -191,9 +197,9 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
           </div>
         </div>
       )}
-      
+
       <div className="flex items-center justify-between mb-8">
-        <button 
+        <button
           onClick={onBack}
           className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
         >
@@ -201,7 +207,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
         </button>
         <h2 className="text-3xl font-bold text-white">NASA OSDR Files</h2>
       </div>
-      
+
       {selectedFile ? (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 mb-8">
           <div className="flex justify-between items-start mb-4">
@@ -209,14 +215,14 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
               <span className="text-3xl mr-3">{getFileIcon(selectedFile.type)}</span>
               {selectedFile.name}
             </h3>
-            <button 
+            <button
               onClick={() => setSelectedFile(null)}
               className="text-gray-400 hover:text-white"
             >
               ✕
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h4 className="text-lg font-medium text-blue-400 mb-3">File Information</h4>
@@ -243,7 +249,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="text-lg font-medium text-blue-400 mb-3">Research Context</h4>
               <div className="space-y-3">
@@ -262,7 +268,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-6 flex space-x-4">
             <button
               onClick={() => handleViewPDF(selectedFile)}
@@ -283,7 +289,7 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
               ℹ️ Copy URL
             </button>
           </div>
-          
+
           <div className="mt-6 bg-gray-900/50 border border-gray-700 rounded-lg p-4">
             <h4 className="text-lg font-medium text-blue-400 mb-3">Provenance Information</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -307,16 +313,16 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
           </div>
         </div>
       ) : null}
-      
+
       <div className="mb-6 flex justify-between items-center">
         <p className="text-gray-300">
-          Showing {files.length} real files from NASA OSDR S3 repository
+          Showing {files.length} of {totalFiles} files from NASA OSDR S3 repository
         </p>
         <div className="text-sm text-gray-400">
           Last updated: {new Date().toLocaleString()}
         </div>
       </div>
-      
+
       {files.length === 0 ? (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-12 text-center">
           <div className="text-4xl mb-4">📭</div>
@@ -326,65 +332,90 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {files.map((file) => (
-            <div 
-              key={file.id}
-              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {files.map((file) => (
+              <div
+                key={file.id}
+                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="text-3xl">
+                    {getFileIcon(file.type)}
+                  </div>
+                  <span className="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded">
+                    {file.type}
+                  </span>
+                </div>
+
+                <h3 className="font-semibold text-white mb-2 truncate" title={file.name}>
+                  {file.name}
+                </h3>
+
+                <p className="text-sm text-gray-300 mb-4 line-clamp-2">
+                  {file.description}
+                </p>
+
+                <div className="space-y-2 text-xs text-gray-400 mb-4">
+                  <div className="flex justify-between">
+                    <span>Study:</span>
+                    <span className="text-gray-200 font-mono">{file.study_id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Species:</span>
+                    <span className="text-gray-200">{file.species}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Mission:</span>
+                    <span className="text-gray-200">{file.mission}</span>
+                  </div>
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setSelectedFile(file)}
+                    className="flex-1 flex items-center justify-center px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors text-sm"
+                  >
+                    ℹ️ Details
+                  </button>
+                  <button
+                    onClick={() => handleViewPDF(file)}
+                    className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors text-sm"
+                  >
+                    👁️
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="mt-8 flex justify-center items-center space-x-4">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 rounded-md transition-colors"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="text-3xl">
-                  {getFileIcon(file.type)}
-                </div>
-                <span className="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded">
-                  {file.type}
-                </span>
-              </div>
-              
-              <h3 className="font-semibold text-white mb-2 truncate" title={file.name}>
-                {file.name}
-              </h3>
-              
-              <p className="text-sm text-gray-300 mb-4 line-clamp-2">
-                {file.description}
-              </p>
-              
-              <div className="space-y-2 text-xs text-gray-400 mb-4">
-                <div className="flex justify-between">
-                  <span>Study:</span>
-                  <span className="text-gray-200 font-mono">{file.study_id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Species:</span>
-                  <span className="text-gray-200">{file.species}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Mission:</span>
-                  <span className="text-gray-200">{file.mission}</span>
-                </div>
-              </div>
-              
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setSelectedFile(file)}
-                  className="flex-1 flex items-center justify-center px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors text-sm"
-                >
-                  ℹ️ Details
-                </button>
-                <button
-                  onClick={() => handleViewPDF(file)}
-                  className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors text-sm"
-                >
-                  👁️
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+              Previous
+            </button>
+
+            <span className="text-gray-300">
+              Page {currentPage} of {Math.ceil(totalFiles / filesPerPage)}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => prev + 1)}
+              disabled={!hasMore}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 rounded-md transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
-      
+
       {viewingPdf && (
-        <PDFViewer 
+        <PDFViewer
           fileUrl={viewingPdf.url}
           fileName={viewingPdf.name}
           studyId={viewingPdf.study_id}
@@ -394,3 +425,5 @@ export function OSDRFiles({ onBack }: OSDRFilesProps) {
     </div>
   )
 }
+
+export default OSDRFiles

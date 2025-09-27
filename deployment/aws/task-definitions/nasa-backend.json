@@ -47,10 +47,6 @@
         {
           "name": "NEO4J_PASSWORD", 
           "valueFrom": "arn:aws:secretsmanager:us-east-1:YOUR_ACCOUNT_ID:secret:nasa/neo4j-password"
-        },
-        {
-          "name": "MISTRAL_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:YOUR_ACCOUNT_ID:secret:nasa/mistral-api-key"
         }
       ],
       "logConfiguration": {

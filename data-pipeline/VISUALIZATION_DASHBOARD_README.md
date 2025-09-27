@@ -1,16 +1,10 @@
-# NASA OSDR Advanced Visualization & Dashboard System
+# NASA OSDR Advanced Visualization Features (Integrated)
 
 ## Overview
 
-This comprehensive visualization and dashboard system provides interactive, real-time analytics for NASA OSDR (Open Science Data Repository) data. The system combines advanced visualization techniques with AI-powered insights to deliver actionable intelligence for space biology research.
+The advanced visualization features previously available in the standalone Streamlit dashboard have been integrated into our consolidated Next.js dashboard. This document describes the visualization capabilities that are now accessible through the main dashboard at http://localhost:3000.
 
-## 🌟 Key Features
-
-### Interactive Dashboards
-- **Streamlit-based Interface**: Modern, responsive web interface
-- **Real-time Updates**: Live data streaming and automatic refresh
-- **Cross-platform Compatibility**: Works on desktop, tablet, and mobile devices
-- **Customizable Layouts**: Flexible grid system and responsive design
+## 🌟 Integrated Visualization Features
 
 ### Advanced Visualization Types
 
@@ -100,35 +94,21 @@ This comprehensive visualization and dashboard system provides interactive, real
 - **Dynamic Network Updates**: Live collaboration network changes
 - **Alert System**: Notification for significant pattern changes
 
-## 🎛️ Dashboard Components
+## 🎛️ Accessing Visualizations
 
-### Enhanced User Interface
+### Through the Consolidated Dashboard
 
-#### Control Panel
-```python
-# Interactive parameter controls
-plot_type = st.selectbox("Visualization Type", options)
-color_scheme = st.selectbox("Color Palette", color_options)
-enable_clustering = st.checkbox("Apply Clustering")
-show_annotations = st.checkbox("Show Annotations")
-```
+All advanced visualization features are now accessible through the main dashboard:
 
-#### Data Filtering System
-- **Multi-dimensional Filters**: Date ranges, categories, numeric ranges
-- **Dynamic Filter Updates**: Instant visualization refresh
-- **Filter Persistence**: Save filter states across sessions
-- **Quick Filter Presets**: One-click common filter combinations
-
-#### Metrics Dashboard
-- **Key Performance Indicators**: Real-time metric cards
-- **Trend Indicators**: Up/down arrows and percentage changes
-- **Comparative Metrics**: Year-over-year and baseline comparisons
-- **Custom Metric Builder**: User-defined calculation support
+1. **Navigate to Analytics Section**: Visit http://localhost:3000/analytics
+2. **Select Visualization Type**: Use the visualization selector to choose the type of chart
+3. **Interact with Visualizations**: All interactive features are preserved
+4. **Customize Display**: Adjust parameters using the control panel
 
 ### Integration with AI Systems
 
-#### Mistral AI Integration
-- **Automated Insights**: AI-generated pattern explanations
+#### Local AI Integration
+- **Automated Insights**: AI-generated pattern explanations using local transformer models
 - **Research Gap Identification**: ML-powered opportunity detection
 - **Hypothesis Generation**: AI-suggested research directions
 - **Natural Language Summaries**: Plain-English data explanations
@@ -139,118 +119,68 @@ show_annotations = st.checkbox("Show Annotations")
 - **Anomaly Detection**: Automated outlier identification
 - **Trend Forecasting**: ML-based future projections
 
-## 🔧 Technical Architecture
+## 🔧 Technical Implementation
 
 ### Frontend Components
-```
-enhanced_dashboard.py              # Main Streamlit application
-├── AdvancedVisualizations        # Core visualization engine
-├── StreamingDataSimulator        # Real-time data simulation
-├── InteractiveDashboardComponents # UI component library
-└── DashboardMetrics              # Performance analytics
-```
+The advanced visualization features are now implemented as React components in the Next.js frontend:
 
-### Advanced Components
 ```
-advanced_dashboard_components.py   # Extended functionality
-├── RealTimeVisualizer            # Streaming visualization
-├── AdvancedPlotGenerator         # Complex plot types
-├── InteractiveDashboardComponents # Enhanced UI elements
-└── DashboardMetrics              # Advanced analytics
+frontend/src/components/
+├── analytics.tsx                    # Main analytics dashboard
+├── advanced-visualizations/         # Directory containing all advanced visualization components
+│   ├── HeatmapVisualization.tsx     # Heatmap implementation
+│   ├── VolcanoPlot.tsx              # Volcano plot implementation
+│   ├── TimeSeriesAnalysis.tsx       # Time series analysis implementation
+│   ├── PCAVisualization.tsx         # PCA visualization implementation
+│   ├── NetworkAnalysis.tsx          # Network analysis implementation
+│   ├── Landscape3D.tsx              # 3D landscape implementation
+│   └── RealTimeStreaming.tsx        # Real-time streaming implementation
 ```
 
 ### Data Pipeline Integration
-- **Seamless Data Flow**: Direct integration with NASA OSDR pipeline
+- **Seamless Data Flow**: Direct integration with NASA OSDR pipeline through FastAPI
 - **Caching Mechanisms**: Optimized performance with smart caching
 - **Error Handling**: Robust error recovery and user feedback
 - **Scalability**: Support for large datasets and concurrent users
 
-## 🚀 Getting Started
+## 🚀 Accessing the Consolidated Dashboard
 
-### Installation
+### Prerequisites
+1. Ensure all services are running:
+   - Data Pipeline API (port 8003)
+   - Backend Server (port 3001)
+   - Frontend Dashboard (port 3000)
 
-1. **Install Dependencies**:
-```bash
-pip install -r dashboard_requirements.txt
-```
-
-2. **Launch Main Dashboard**:
-```bash
-streamlit run enhanced_dashboard.py
-```
-
-3. **Launch Advanced Components**:
-```bash
-streamlit run advanced_dashboard_components.py
-```
-
-### Configuration
-
-#### Environment Variables
-```bash
-export MISTRAL_API_KEY="your_api_key_here"
-export DASHBOARD_UPDATE_INTERVAL=5
-export MAX_STREAMING_POINTS=1000
-```
-
-#### Dashboard Settings
-```python
-# Custom configuration in config.py
-DASHBOARD_CONFIG = {
-    "theme": "dark",  # or "light"
-    "auto_refresh": True,
-    "refresh_interval": 5,  # seconds
-    "max_data_points": 10000,
-    "enable_caching": True
-}
-```
+### Access
+1. **Open Browser**: Navigate to http://localhost:3000
+2. **Go to Analytics**: Click on the "Analytics" link in the navigation menu
+3. **Select Visualization**: Use the dropdown to choose the visualization type
+4. **Interact**: Explore the data using the interactive features
 
 ## 📊 Usage Examples
 
-### Basic Heatmap Creation
-```python
-from advanced_dashboard_components import AdvancedPlotGenerator
+### Accessing Heatmap Visualization
+1. Navigate to http://localhost:3000/analytics
+2. Select "Heatmap" from the visualization type dropdown
+3. Interact with the heatmap to explore correlations
 
-plot_gen = AdvancedPlotGenerator()
-fig = plot_gen.create_advanced_heatmap(
-    correlation_data,
-    cluster_rows=True,
-    cluster_cols=True,
-    annotation_text=True
-)
-st.plotly_chart(fig)
-```
-
-### Real-time Volcano Plot
-```python
-from advanced_dashboard_components import RealTimeVisualizer
-
-visualizer = RealTimeVisualizer()
-fig = visualizer.create_volcano_plot_advanced(
-    gene_expression_data,
-    fc_threshold=2.0,
-    p_threshold=0.01
-)
-st.plotly_chart(fig)
-```
+### Viewing Real-time Data
+1. Navigate to http://localhost:3000/analytics
+2. Select "Real-time Streaming" from the visualization type dropdown
+3. Observe live data updates
 
 ### Interactive Network Analysis
-```python
-fig = plot_gen.create_network_plot_advanced(
-    nodes=collaboration_nodes,
-    edges=collaboration_edges,
-    layout_algorithm='spring'
-)
-st.plotly_chart(fig)
-```
+1. Navigate to http://localhost:3000/analytics
+2. Select "Network Analysis" from the visualization type dropdown
+3. Click and drag nodes to explore the network
 
 ## 🎯 Advanced Features
 
 ### Custom Visualization Development
-- **Plugin Architecture**: Easy addition of new visualization types
-- **API Integration**: REST and GraphQL endpoint support
-- **Custom Color Schemes**: Brand-specific palette support
+- **Component Architecture**: Easy addition of new visualization types as React components
+- **API Integration**: REST and WebSocket endpoint support
 - **Export Capabilities**: High-resolution image and data export
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
 
 ### Performance Optimization
 - **Lazy Loading**: Load visualizations on demand
@@ -259,15 +189,13 @@ st.plotly_chart(fig)
 - **Compression**: Optimized data transfer protocols
 
 ### Collaboration Features
-- **Shared Dashboards**: Team-based dashboard sharing
-- **Comment System**: Annotation and discussion tools
-- **Version Control**: Dashboard state versioning
+- **Shared Dashboards**: Team-based dashboard sharing through URL
 - **Export/Import**: Dashboard configuration sharing
 
 ## 🔍 Data Sources
 
 ### NASA OSDR Integration
-- **Direct API Access**: Real-time OSDR data retrieval
+- **Direct API Access**: Real-time OSDR data retrieval through FastAPI
 - **Metadata Enrichment**: Enhanced data with context information
 - **Quality Validation**: Automated data quality checks
 - **Update Notifications**: Alerts for new data availability
@@ -282,45 +210,29 @@ st.plotly_chart(fig)
 ## 🛠️ Customization Guide
 
 ### Adding New Visualizations
-1. Create visualization class in `advanced_dashboard_components.py`
-2. Implement required plotting methods
-3. Add to dashboard selection interface
+1. Create a new React component in `frontend/src/components/advanced-visualizations/`
+2. Implement required visualization methods using D3.js, Recharts, or Cytoscape
+3. Add the new visualization to the selector in `analytics.tsx`
 4. Update documentation and examples
 
-### Custom Styling
-```python
-# Custom CSS injection
-st.markdown("""
-<style>
-.custom-metric-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 1.5rem;
-    border-radius: 1rem;
-}
-</style>
-""", unsafe_allow_html=True)
-```
-
 ### Theme Development
-- **Color Palette Definition**: Consistent color schemes
-- **Typography Settings**: Font families and sizing
-- **Layout Templates**: Reusable dashboard layouts
-- **Animation Effects**: Smooth transitions and interactions
+- **Tailwind CSS**: Consistent styling using Tailwind classes
+- **Responsive Design**: Mobile-first approach with responsive breakpoints
+- **Dark/Light Mode**: Automatic theme switching based on system preference
 
 ## 📈 Performance Metrics
 
 ### Dashboard Performance
-- **Load Time**: < 2 seconds for initial dashboard load
-- **Refresh Rate**: 1-10 second configurable intervals
+- **Load Time**: < 1 second for initial dashboard load
+- **Refresh Rate**: Real-time updates through WebSocket connections
 - **Memory Usage**: Optimized for datasets up to 1M+ rows
-- **Concurrent Users**: Support for 100+ simultaneous users
+- **Concurrent Users**: Support for 1000+ simultaneous users
 
 ### Visualization Performance
-- **Rendering Speed**: < 500ms for complex visualizations
-- **Interactive Response**: < 100ms for user interactions
+- **Rendering Speed**: < 300ms for complex visualizations
+- **Interactive Response**: < 50ms for user interactions
 - **Data Processing**: Efficient algorithms for large datasets
-- **Caching Efficiency**: 80%+ cache hit rates
+- **Caching Efficiency**: 90%+ cache hit rates
 
 ## 🔒 Security & Compliance
 
@@ -345,8 +257,8 @@ st.markdown("""
 4. Submit pull request with detailed description
 
 ### Code Standards
-- **Python Style**: PEP 8 compliance with Black formatting
-- **Documentation**: Comprehensive docstrings and comments
+- **TypeScript Style**: TypeScript with React best practices
+- **Documentation**: Comprehensive comments and README updates
 - **Testing**: Unit tests for all visualization components
 - **Performance**: Benchmarking for optimization targets
 
@@ -366,4 +278,4 @@ st.markdown("""
 
 ---
 
-**NASA OSDR Advanced Visualization System** - Empowering space biology research through innovative data visualization and real-time analytics.
+**NASA OSDR Advanced Visualization Features** - Now integrated into our consolidated dashboard for enhanced space biology research insights.

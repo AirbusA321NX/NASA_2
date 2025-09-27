@@ -1,21 +1,3 @@
-"""
-NASA OSDR Complete Data Pipeline Orchestrator
-==============================================
-
-This script implements the complete workflow:
-Get Data → Preprocess → Summarize → Use Local AI → Dashboard
-
-Usage:
-    python pipeline_orchestrator.py --mode [full|analyze|dashboard]
-    
-    Modes:
-    - full: Run complete pipeline with real NASA OSDR data
-    - analyze: Run data analysis only  
-    - dashboard: Launch Streamlit dashboard only
-
-IMPORTANT: This system only uses real NASA OSDR data - no mock or fake data.
-"""
-
 import asyncio
 import argparse
 import logging
@@ -54,7 +36,7 @@ class PipelineOrchestrator:
         """
         Step 1: Get Data → Pull the NASA OSDR dataset from the AWS S3 repo
         """
-        logger.info("🔍 Step 1: Fetching NASA OSDR data...")
+        logger.info("Step 1: Fetching NASA OSDR data...")
         
         try:
             # Use real OSDR processor only
@@ -64,21 +46,21 @@ class PipelineOrchestrator:
                 )
                 
                 if publications:
-                    logger.info(f"✅ Successfully fetched {len(publications)} real publications")
+                    logger.info(f" Successfully fetched {len(publications)} real publications")
                     return True
                 else:
-                    logger.error("❌ Failed to fetch OSDR data")
+                    logger.error(" Failed to fetch OSDR data")
                     return False
                         
         except Exception as e:
-            logger.error(f"❌ Error in data fetching: {e}")
+            logger.error(f" Error in data fetching: {e}")
             return False
     
     def step_2_preprocess_analyze(self) -> bool:
         """
         Step 2: Preprocess → Use Python (pandas/numpy) to clean, normalize, and analyze
         """
-        logger.info("🔬 Step 2: Preprocessing and analyzing data...")
+        logger.info(" Step 2: Preprocessing and analyzing data...")
         
         try:
             # Initialize analyzer
@@ -152,45 +134,43 @@ class PipelineOrchestrator:
     
     def step_5_dashboard(self) -> bool:
         """
-        Step 5: Dashboard → Launch Streamlit app showing charts + AI interpretations
+        Launch the consolidated dashboard via instructions.
+        The dashboard is now a Next.js application accessible at http://localhost:3000
         """
-        logger.info(" Step 5: Launching interactive dashboard...")
-        
         try:
-            # Check if required files exist
-            required_files = [self.raw_data_path, self.analysis_results_path]
-            
-            for file_path in required_files:
-                if not file_path.exists():
-                    logger.warning(f"⚠️ File not found: {file_path}")
-            
-            # Launch Streamlit dashboard
-            dashboard_path = Path(__file__).parent / "dashboard.py"
-            
-            if not dashboard_path.exists():
-                logger.error(f" Dashboard file not found: {dashboard_path}")
-                return False
-            
-            logger.info(" Starting Streamlit dashboard...")
-            logger.info(" Dashboard will be available at: http://localhost:8501")
-            
-            # Run Streamlit
-            result = subprocess.run([
-                sys.executable, "-m", "streamlit", "run", 
-                str(dashboard_path),
-                "--server.port", "8501",
-                "--server.address", "localhost"
-            ], check=False)
-            
-            return result.returncode == 0
+            logger.info("=== CONSOLIDATED DASHBOARD ===")
+            logger.info("The advanced visualization features have been integrated into")
+            logger.info("the Next.js frontend dashboard.")
+            logger.info("")
+            logger.info("To access the dashboard:")
+            logger.info("1. Ensure all services are running:")
+            logger.info("   - Data Pipeline API (port 8003)")
+            logger.info("   - Backend Server (port 3001)")
+            logger.info("   - Frontend Dashboard (port 3000)")
+            logger.info("")
+            logger.info("2. Open your browser and navigate to:")
+            logger.info("   http://localhost:3000")
+            logger.info("")
+            logger.info("3. Access the advanced visualizations through the Analytics section")
+            logger.info("   - Heatmaps & Correlation Analysis")
+            logger.info("   - Volcano Plots for Differential Analysis")
+            logger.info("   - Time Series Analysis with Trend Detection")
+            logger.info("   - Principal Component Analysis (PCA)")
+            logger.info("   - Network Analysis for Collaboration Mapping")
+            logger.info("   - 3D Research Landscapes")
+            logger.info("   - Real-time Data Streaming")
+            logger.info("")
+            logger.info("The dashboard provides all the advanced visualization features")
+            logger.info("previously available in the standalone Streamlit dashboard.")
+            return True
             
         except Exception as e:
-            logger.error(f" Error launching dashboard: {e}")
+            logger.error(f" Error with dashboard instructions: {e}")
             return False
     
     async def run_full_pipeline(self) -> bool:
         """
-        Run the complete pipeline: Get Data → Preprocess → Summarize → Use Local AI → Dashboard
+        Run the complete pipeline: Get Data → Preprocess → Summarize → Use Local AI → Dashboard Instructions
         """
         logger.info(" Starting complete NASA OSDR analysis pipeline...")
         
@@ -213,15 +193,15 @@ class PipelineOrchestrator:
         if not self.step_4_local_ai():
             logger.warning(" Local AI processing failed, but continuing...")
         
-        # Step 5: Dashboard
+        # Step 5: Dashboard Instructions
         logger.info(" Pipeline completed successfully!")
         logger.info(" Summary of results:")
         
         # Display summary
         self.display_pipeline_summary()
         
-        # Launch dashboard
-        logger.info(" Launching dashboard...")
+        # Show dashboard instructions
+        logger.info(" Launching dashboard instructions...")
         self.step_5_dashboard()
         
         return True

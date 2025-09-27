@@ -1,10 +1,29 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Roboto_Mono, Orbitron } from 'next/font/google'
 import { Providers } from '@/components/providers'
 import { Toaster } from 'react-hot-toast'
 
-const inter = Inter({ subsets: ['latin'] })
+// Primary font for body text - Inter is clean and modern
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter'
+})
+
+// Monospace font for technical content
+const robotoMono = Roboto_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-roboto-mono'
+})
+
+// Futuristic font for headings and NASA-themed elements
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-orbitron'
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -47,7 +66,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-gray-900 text-white antialiased`}>
+      <body className={`${inter.variable} ${robotoMono.variable} ${orbitron.variable} font-sans bg-gray-900 text-white antialiased`}>
         <Providers>
           <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900">
             {children}

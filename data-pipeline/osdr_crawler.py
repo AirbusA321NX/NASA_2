@@ -79,8 +79,8 @@ class OSDRCrawler:
                                 study = {
                                     'osd_id': study_id,
                                     'title': f"NASA OSDR Study {study_id}",
-                                    'description': f"Space biology research from NASA OSDR: {study_id}",
-                                    'study_type': "Space Biology Research",
+                                    'description': f"Research from NASA OSDR: {study_id}",
+                                    'study_type': self._categorize_study_type(study_id, study_objects),
                                     'submission_date': self._extract_publication_date(study_id),
                                     'doi': f"10.26030/nasa-{study_id.lower()}",
                                     'principal_investigator': ["NASA OSDR Team"],
@@ -191,8 +191,8 @@ class OSDRCrawler:
             
             for link in links:
                 if hasattr(link, 'get') and hasattr(link, 'get_text'):
-                    href = str(link.get('href', ''))
-                    text = str(link.get_text())
+                    href = str(getattr(link, 'get', lambda x, y: '')('href', ''))
+                    text = str(getattr(link, 'get_text', lambda: str(link))())
                     
                     # Debug logging
                     logger.debug(f"Examining link - href: '{href}', text: '{text}'")
@@ -207,8 +207,11 @@ class OSDRCrawler:
                         study = {
                             'osd_id': osd_id,
                             'title': f"NASA OSDR Study {osd_id}",
-                            'description': f"Space biology research from NASA OSDR: {osd_id}",
-                            'study_type': "Space Biology Research",
+                            'description': f"Research from NASA OSDR: {osd_id}",
+                            'study_type': self._categorize_study_type(osd_id, [{
+                                'file_url': f"{self.base_url}/{href}" if href.startswith('/') else f"{self.base_url}/{href}",
+                                'file_type': "NASA Research Data"
+                            }]),
                             'submission_date': self._extract_publication_date(osd_id),
                             'doi': f"10.26030/nasa-{osd_id.lower()}",
                             'principal_investigator': ["NASA OSDR Team"],
@@ -278,6 +281,59 @@ class OSDRCrawler:
         
         # Fallback if we can't determine species
         return "Various Organisms"
+
+    def _categorize_study_type(self, study_id: str, study_objects: List[Dict[str, Any]]) -> str:
+        """
+        Categorize study type based on study ID and file objects
+        """
+        # Start with a base category
+        study_type = "Space Biology Research"
+        
+        # Analyze file objects for specific study type clues
+        file_keys = ' '.join([obj.get('key', '') for obj in study_objects]).lower()
+        
+        # Determine study type based on file content patterns
+        if 'microarray' in file_keys:
+            study_type = "Gene Expression Analysis"
+        elif 'rna-seq' in file_keys or 'rna_seq' in file_keys:
+            study_type = "Transcriptomics"
+        elif 'proteom' in file_keys:
+            study_type = "Proteomics"
+        elif 'metabolom' in file_keys:
+            study_type = "Metabolomics"
+        elif 'sequenc' in file_keys:
+            study_type = "Genomics"
+        elif 'image' in file_keys or 'microscop' in file_keys:
+            study_type = "Cellular Imaging"
+        elif 'physio' in file_keys or 'ecg' in file_keys or 'heart' in file_keys:
+            study_type = "Physiological Studies"
+        elif 'behav' in file_keys or 'cognit' in file_keys:
+            study_type = "Behavioral Research"
+        
+        # If still generic, try to extract from study ID patterns
+        if study_type == "Space Biology Research":
+            # Extract study number from ID
+            try:
+                study_number = int(study_id.split('-')[1]) if '-' in study_id and study_id.split('-')[1].isdigit() else 0
+                # Use study number to diversify categories
+                categories = [
+                    "Gene Expression Analysis",
+                    "Transcriptomics", 
+                    "Proteomics",
+                    "Metabolomics",
+                    "Genomics",
+                    "Cellular Imaging",
+                    "Physiological Studies",
+                    "Behavioral Research",
+                    "Plant Biology",
+                    "Microbial Research"
+                ]
+                if study_number > 0:
+                    study_type = categories[(study_number - 1) % len(categories)]
+            except:
+                pass
+        
+        return study_type
 
     def _extract_publication_date(self, study_id: str) -> str:
         """

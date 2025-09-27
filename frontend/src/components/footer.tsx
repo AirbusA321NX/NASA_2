@@ -45,7 +45,7 @@ export function Footer() {
             </h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>Next.js & React</li>
-              <li>Mistral AI</li>
+              <li>Local Transformer Models</li>
               <li>Neo4j Knowledge Graph</li>
               <li>D3.js Visualizations</li>
             </ul>

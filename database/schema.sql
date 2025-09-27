@@ -1,10 +1,8 @@
 -- PostgreSQL Schema for NASA Space Biology Knowledge Engine
 
 -- Create database
-CREATE DATABASE nasa_space_biology;
+CREATE DATABASE nasa_biology;
 
--- Connect to the database
-\c nasa_space_biology;
 
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -1,0 +1,66 @@
+{
+    "publications": [
+        {
+            "title": "Effects of Microgravity on Plant Growth",
+            "authors": [
+                "Smith, J.",
+                "Johnson, A."
+            ],
+            "abstract": "This study examines the effects of microgravity on Arabidopsis thaliana growth during spaceflight missions.",
+            "publication_date": "2023-01-15T00:00:00",
+            "doi": "10.1000/nasa.2023.001",
+            "osdr_id": "OSD-1234",
+            "keywords": [
+                "microgravity",
+                "plant biology",
+                "Arabidopsis",
+                "spaceflight"
+            ],
+            "research_area": "Plant Biology",
+            "study_type": "Experimental",
+            "organisms": [
+                "Arabidopsis thaliana"
+            ],
+            "file_urls": [
+                "https://example.com/data1.csv"
+            ],
+            "metadata": {
+                "mission": "ISS Expedition 68",
+                "duration": "90 days",
+                "facility": "Veggie Plant Growth System"
+            }
+        },
+        {
+            "title": "Human Cardiovascular Response to Spaceflight",
+            "authors": [
+                "Williams, R.",
+                "Brown, M.",
+                "Davis, K."
+            ],
+            "abstract": "Analysis of cardiovascular changes in astronauts during long-duration space missions on the International Space Station.",
+            "publication_date": "2023-03-22T00:00:00",
+            "doi": "10.1000/nasa.2023.002",
+            "osdr_id": "OSD-5678",
+            "keywords": [
+                "cardiovascular",
+                "human physiology",
+                "spaceflight",
+                "ISS"
+            ],
+            "research_area": "Human Research",
+            "study_type": "Clinical",
+            "organisms": [
+                "Homo sapiens"
+            ],
+            "file_urls": [
+                "https://example.com/data2.csv",
+                "https://example.com/data2b.pdf"
+            ],
+            "metadata": {
+                "mission": "ISS Expeditions 67-69",
+                "duration": "180 days",
+                "facility": "Human Research Facility"
+            }
+        }
+    ]
+}

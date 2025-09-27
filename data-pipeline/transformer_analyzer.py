@@ -8,6 +8,9 @@ import numpy as np
 import logging
 from typing import Dict, List, Any
 import json
+from tqdm import tqdm
+import time
+import sys
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -50,40 +53,101 @@ class TransformerAnalyzer:
             Dictionary with AI analysis results
         """
         if not self.initialized:
+            logger.info("AI Engine: Using fallback analysis (transformer models not available)")
             return self._fallback_analysis(nasa_data)
             
+        # Initialize progress bar variable
+        pbar = None
+        
         try:
-            logger.info("Starting transformer-based analysis...")
+            logger.info("AI Engine: Starting transformer-based analysis...")
+            logger.info("AI Engine: Initializing progress tracking...")
             
-            # 1. Overview Analysis
-            overview = self._generate_overview_analysis(nasa_data)
+            # Create a progress bar for the analysis steps
+            analysis_steps = [
+                ("Generating overview analysis", self._generate_overview_analysis, nasa_data),
+                ("Analyzing research trends", self._generate_trends_analysis, nasa_data),
+                ("Identifying research gaps", self._generate_gaps_analysis, nasa_data),
+                ("Analyzing organism data", self._generate_organism_analysis, nasa_data),
+                ("Generating future trends predictions", self._generate_future_trends, nasa_data)
+            ]
             
-            # 2. Research Trends Analysis
-            research_trends = self._generate_trends_analysis(nasa_data)
+            # Initialize progress bar with explicit flushing
+            pbar = tqdm(total=len(analysis_steps), desc="AI Engine Progress", unit="step", 
+                       bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]',
+                       file=sys.stdout,  # Explicitly use stdout
+                       leave=True)       # Keep the progress bar after completion
             
-            # 3. Research Gaps Analysis
-            research_gaps = self._generate_gaps_analysis(nasa_data)
+            # Store results
+            results = {}
             
-            # 4. Organism Analysis
-            organism_analysis = self._generate_organism_analysis(nasa_data)
+            # Log start of analysis
+            logger.info(f"AI Engine: Starting analysis of {len(analysis_steps)} steps")
             
-            # 5. Future Predictions
-            future_trends = self._generate_future_trends(nasa_data)
+            # Execute each analysis step with progress updates
+            for i, (step_name, step_func, step_data) in enumerate(analysis_steps, 1):
+                logger.info(f"AI Engine: [{i}/{len(analysis_steps)}] {step_name}...")
+                if pbar:  # Check if pbar is initialized
+                    pbar.set_description(f"AI Engine: {step_name}")
+                
+                # Update progress bar description
+                if pbar:  # Check if pbar is initialized
+                    pbar.set_postfix(step=step_name.split()[0])
+                
+                # Flush the output to ensure visibility
+                sys.stdout.flush()
+                
+                # Execute the analysis step
+                if step_name == "Generating overview analysis":
+                    results["overview"] = step_func(step_data)
+                elif step_name == "Analyzing research trends":
+                    results["researchTrends"] = step_func(step_data)
+                elif step_name == "Identifying research gaps":
+                    results["researchGaps"] = step_func(step_data)
+                elif step_name == "Analyzing organism data":
+                    results["organismAnalysis"] = step_func(step_data)
+                elif step_name == "Generating future trends predictions":
+                    results["futureTrends"] = step_func(step_data)
+                
+                # Update progress bar
+                if pbar:  # Check if pbar is initialized
+                    pbar.update(1)
+                
+                # Log completion of this step
+                logger.info(f"AI Engine: [{i}/{len(analysis_steps)}] {step_name} completed")
+                
+                # Flush output to ensure progress is visible
+                sys.stdout.flush()
+                
+                # Small delay to make progress visible
+                time.sleep(0.2)
             
-            return {
-                "overview": overview,
-                "researchTrends": research_trends,
-                "researchGaps": research_gaps,
-                "organismAnalysis": organism_analysis,
-                "futureTrends": future_trends,
-                "emergingAreas": self._extract_emerging_areas(research_trends),
-                "keyFindings": self._extract_key_findings(overview),
-                "recommendations": self._extract_recommendations(research_gaps),
+            # Close progress bar
+            if pbar:
+                pbar.close()
+            
+            # Log completion
+            logger.info("AI Engine: All analysis steps completed, generating final results...")
+            
+            # Add additional computed results
+            results.update({
+                "emergingAreas": self._extract_emerging_areas(results["researchTrends"]),
+                "keyFindings": self._extract_key_findings(results["overview"]),
+                "recommendations": self._extract_recommendations(results["researchGaps"]),
                 "confidenceScore": 0.85  # High confidence for transformer-based analysis
-            }
+            })
+            
+            logger.info("AI Engine: Analysis completed successfully")
+            return results
             
         except Exception as e:
-            logger.error(f"Transformer analysis failed: {e}")
+            logger.error(f"AI Engine: Transformer analysis failed: {e}")
+            # Close progress bar if it's still open
+            try:
+                if pbar:
+                    pbar.close()
+            except:
+                pass
             return self._fallback_analysis(nasa_data)
 
     def _generate_overview_analysis(self, nasa_data: Dict[str, Any]) -> List[str]:

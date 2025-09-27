@@ -25,13 +25,13 @@ export function Search({ onBack }: SearchProps) {
   const [analyzing, setAnalyzing] = useState(false)
   const [searchType, setSearchType] = useState<'semantic' | 'keyword'>('semantic')
 
-  // Real Mistral AI-powered search function
+  // Real local AI-powered search function
   const performSearch = async (searchQuery: string) => {
     setLoading(true)
     setAnalyzing(true)
-    
+
     try {
-      // Use the Mistral AI-powered search endpoint
+      // Use the local AI-powered search endpoint
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/search/ai`, {
         method: 'POST',
         headers: {
@@ -43,45 +43,45 @@ export function Search({ onBack }: SearchProps) {
           limit: 10
         })
       })
-      
+
       if (!response.ok) {
         throw new Error(`Backend API error: ${response.status}`)
       }
-      
+
       const data = await response.json()
-      
+
       if (!data.success) {
         throw new Error(data.error || 'Search failed')
       }
-      
+
       // Transform backend data to our format
       const publications: Publication[] = data.data.results?.map((result: any) => ({
         id: result.osdr_id || result.id,
         title: result.title || 'Untitled Study',
         abstract: result.ai_summary || result.abstract || result.description || '',
-        authors: Array.isArray(result.authors) ? result.authors : 
-                result.principal_investigator ? [result.principal_investigator] : [],
+        authors: Array.isArray(result.authors) ? result.authors :
+          result.principal_investigator ? [result.principal_investigator] : [],
         date: result.publication_date || result.submission_date || new Date().toISOString(),
         source: 'NASA OSDR',
         tags: [
           ...(result.ai_keywords || result.keywords || []),
           result.research_area || result.study_type || 'Space Biology',
-          ...(result.organisms?.map((org: any) => 
+          ...(result.organisms?.map((org: any) =>
             typeof org === 'string' ? org : org.scientificName
           ).filter(Boolean) || [])
         ].slice(0, 8),
         relevanceScore: result.semantic_score || result.relevance_score || 0.8
       })) || []
-      
+
       setResults(publications)
-      
+
       // Show AI enhancement status
       if (data.data.ai_enhanced) {
         console.log(` AI Enhanced Search - Model: ${data.data.model_used}`);
       } else {
         console.log('⚠️ Fallback keyword search used');
       }
-      
+
     } catch (error) {
       console.error('AI search error:', error)
       // Show error to user
@@ -118,16 +118,16 @@ export function Search({ onBack }: SearchProps) {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
-      
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">AI-Powered Smart Search</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 font-orbitron">AI-Powered Smart Search</h1>
           <p className="text-gray-300">Search through NASA space biology publications using semantic AI</p>
         </div>
-        <button 
+        <button
           onClick={onBack}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors font-orbitron"
         >
           ← Back to Dashboard
         </button>
@@ -138,12 +138,12 @@ export function Search({ onBack }: SearchProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold text-white mb-2 font-orbitron">
               {searchType === 'semantic' ? 'AI Analysis in Progress' : 'Searching Publications'}
             </h3>
             <p className="text-gray-300 mb-4">
-              {searchType === 'semantic' 
-                ? 'Analyzing publications with semantic AI...' 
+              {searchType === 'semantic'
+                ? 'Analyzing publications with semantic AI...'
                 : 'Scanning through NASA OSDR database...'}
             </p>
             <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
@@ -166,13 +166,13 @@ export function Search({ onBack }: SearchProps) {
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg 
                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                          text-white placeholder-gray-400"
+                          text-white placeholder-gray-400 font-sans"
               />
             </div>
             <button
               type="submit"
               disabled={loading || !query.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors font-medium font-orbitron"
             >
               {loading ? 'Searching...' : 'Search'}
             </button>
@@ -180,28 +180,26 @@ export function Search({ onBack }: SearchProps) {
 
           {/* Search Type Toggle */}
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-300">Search Type:</span>
+            <span className="text-sm text-gray-300 font-orbitron">Search Type:</span>
             <button
               type="button"
               onClick={() => setSearchType('semantic')}
-              className={`px-3 py-1 rounded text-sm transition-colors ${
-                searchType === 'semantic' 
-                  ? 'bg-blue-600 text-white' 
+              className={`px-3 py-1 rounded text-sm transition-colors font-orbitron ${searchType === 'semantic'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
+                }`}
             >
               Semantic AI
             </button>
             <button
               type="button"
               onClick={() => setSearchType('keyword')}
-              className={`px-3 py-1 rounded text-sm transition-colors ${
-                searchType === 'keyword' 
-                  ? 'bg-blue-600 text-white' 
+              className={`px-3 py-1 rounded text-sm transition-colors font-orbitron ${searchType === 'keyword'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
+                }`}
             >
-              Keyword
+              Keyword Search
             </button>
           </div>
         </form>
@@ -218,8 +216,8 @@ export function Search({ onBack }: SearchProps) {
                 <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full animate-pulse-custom"></div>
               </div>
               <p className="text-gray-400 text-sm mt-2">
-                {searchType === 'semantic' 
-                  ? 'Processing with semantic AI analysis...' 
+                {searchType === 'semantic'
+                  ? 'Processing with semantic AI analysis...'
                   : 'Scanning through NASA OSDR database...'}
               </p>
             </div>
@@ -320,3 +318,5 @@ export function Search({ onBack }: SearchProps) {
     </div>
   )
 }
+
+export default Search

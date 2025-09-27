@@ -11,6 +11,8 @@ interface DashboardStats {
   yearsOfResearch: number | null
   totalRecords: number | null
   dataSource: string
+  uniqueOrganisms: number | null
+  organismDescription: string | null
 }
 
 // Add new interface for error state
@@ -50,22 +52,41 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         setError(null);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/analytics?period=all_time`)
         const data = await response.json()
-        
+
         if (data.success && data.data) {
           const analytics = data.data
           console.log('Dashboard analytics data:', analytics);
-          
+
           // Calculate values from real data with proper fallbacks
           const totalDatasets = analytics.overview?.total_publications ?? null
-          const yearsOfResearch = analytics.overview?.year_range ? 
-            (new Date().getFullYear() - parseInt(analytics.overview.year_range.split(' - ')[0]) + 1) : null
+          // Fix the years of research calculation to show the actual range instead of years from start to current
+          const yearsOfResearch = analytics.overview?.year_range ?
+            (function () {
+              const [startYear, endYear] = analytics.overview.year_range.split(' - ').map(Number);
+              return endYear - startYear + 1;
+            })() : null
           const totalRecords = analytics.overview?.total_publications ?? null
-          
+          const uniqueOrganisms = analytics.overview?.unique_organisms ?? null
+
+          // Generate organism description from real data
+          let organismDescription = 'Data Unavailable';
+          if (analytics.organisms?.top_organisms && Array.isArray(analytics.organisms.top_organisms)) {
+            const organisms = analytics.organisms.top_organisms;
+            if (organisms.length > 0) {
+              // Use the actual organisms from the data
+              organismDescription = organisms.length > 1 ?
+                `${organisms[0]} and ${organisms.length - 1} others` :
+                organisms[0];
+            }
+          }
+
           setStats({
             totalDatasets: totalDatasets,
             yearsOfResearch: yearsOfResearch,
             totalRecords: totalRecords,
-            dataSource: 'NASA OSDR'
+            dataSource: 'NASA OSDR',
+            uniqueOrganisms: uniqueOrganisms,
+            organismDescription: organismDescription
           })
         } else if (!data.success && data.error) {
           // Handle error response
@@ -95,7 +116,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         setLoading(false)
       }
     }
-    
+
     fetchDashboardStats()
   }, [])
 
@@ -105,19 +126,19 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       try {
         setSectionsLoading(true);
         setError(null);
-        
+
         // Fetch recent publications
         const pubResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/publications?limit=5`)
         const pubData = await pubResponse.json()
-        
+
         if (pubData.success && pubData.data && pubData.data.publications) {
           setPublications(pubData.data.publications.slice(0, 3)) // Show only top 3
         }
-        
+
         // Fetch research areas
         const areasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004'}/api/analytics`)
         const areasData = await areasResponse.json()
-        
+
         if (areasData.success && areasData.data && areasData.data.research_areas?.top_10) {
           setResearchAreas(areasData.data.research_areas.top_10.slice(0, 5)) // Show only top 5
         } else if (!areasData.success && areasData.error) {
@@ -134,7 +155,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         setSectionsLoading(false)
       }
     }
-    
+
     fetchDashboardSections()
   }, [])
 
@@ -170,15 +191,20 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </div>
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 text-center hover:bg-gray-800/70 transition-all duration-300 shadow-lg hover:shadow-cyan-500/20">
           <div className="text-3xl font-bold text-cyan-400 mb-2">
-            {loading ? '...' : stats?.yearsOfResearch ? `${stats.yearsOfResearch}+` : 'N/A'}
+            {loading ? '...' : stats?.yearsOfResearch ? `${stats.yearsOfResearch}` : 'N/A'}
           </div>
           <div className="text-gray-300 text-sm font-medium">Years of Research</div>
         </div>
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 text-center hover:bg-gray-800/70 transition-all duration-300 shadow-lg hover:shadow-pink-500/20">
           <div className="text-3xl font-bold text-pink-400 mb-2">
-            {loading ? '...' : stats?.totalRecords ? `${stats.totalRecords}+` : 'N/A'}
+            {loading ? '...' : stats?.uniqueOrganisms ? `${stats.uniqueOrganisms}` : 'N/A'}
           </div>
-          <div className="text-gray-300 text-sm font-medium">Research Records</div>
+          <div className="text-gray-300 text-sm font-medium">Organisms Studied</div>
+          {stats?.organismDescription && !loading && (
+            <div className="text-gray-400 text-xs mt-1 truncate" title={stats.organismDescription}>
+              {stats.organismDescription}
+            </div>
+          )}
         </div>
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 text-center hover:bg-gray-800/70 transition-all duration-300 shadow-lg hover:shadow-purple-500/20">
           <div className="text-3xl font-bold text-purple-400 mb-2">
@@ -192,7 +218,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Publications */}
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6">
-          <h3 className="text-xl font-semibold mb-6 text-blue-400 flex items-center">
+          <h3 className="text-xl font-semibold mb-6 text-blue-400 flex items-center font-orbitron">
             <span className="mr-2">📚</span>
             Recent Publications
           </h3>
@@ -279,7 +305,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           Explore the Knowledge Engine
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <button 
+          <button
             onClick={() => {
               console.log('Smart Search clicked');
               onNavigate('search');
@@ -292,8 +318,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               Search real NASA OSDR datasets with AI-powered semantic understanding of space biology research
             </p>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => {
               console.log('Knowledge Graph clicked');
               onNavigate('knowledge-graph');
@@ -306,8 +332,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               Explore connections between OSDR datasets, organisms, and research findings
             </p>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => {
               console.log('Analytics clicked');
               onNavigate('analytics');
@@ -320,8 +346,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               Analyze trends and patterns from NASA space biology data archives
             </p>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => {
               console.log('OSDR Files clicked');
               onNavigate('osdr-files');

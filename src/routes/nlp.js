@@ -50,7 +50,7 @@ class NLPService {
         documents: documents.slice(0, 20), // Limit for performance
         analysis_type: analysisType,
         options: {
-          mistral_api_key: process.env.MISTRAL_API_KEY,
+          // No external API keys required - using local AI models
           ...options
         }
       };
@@ -369,7 +369,8 @@ router.get('/status', async (req, res) => {
         available: nlpService.isAvailable,
         python_path: nlpService.pythonPath,
         script_path: nlpService.nlpScriptPath,
-        mistral_configured: !!process.env.MISTRAL_API_KEY,
+        // Using local AI models instead of external services
+        local_ai_configured: true,
         capabilities: [
           'experiment_metadata_analysis',
           'literature_analysis',

@@ -12,6 +12,10 @@ from pathlib import Path
 
 from osdr_processor import OSDADataProcessor, Publication
 from transformer_analyzer import TransformerAnalyzer
+# Import scientific data analyzer
+from scientific_data_analyzer import ScientificDataAnalyzer
+# Import NASADataAnalyzer for clustering data
+from data_analyzer import NASADataAnalyzer
 
 # Import summarization components
 try:
@@ -82,6 +86,11 @@ class SummarizationRequest(BaseModel):
 
 class IncrementalIngestRequest(BaseModel):
     nslsl_query: str = Field("space biology", description="Search query for NSLSL publications")
+
+class ScientificDataAnalysisRequest(BaseModel):
+    study_id: Optional[str] = Field(None, description="Specific study ID to analyze (if None, analyze all)")
+    limit: int = Field(5, description="Maximum number of studies to analyze")
+    sample_files_per_study: int = Field(10, description="Number of files to sample per study")
 
 class ProcessingStatus(BaseModel):
     status: str
@@ -220,24 +229,8 @@ def extract_species_from_metadata(metadata):
                 species = organism_data
                 break
     
-    # If still unknown, try to extract from description or title
-    if species == "Unknown":
-        description = metadata.get('description', '') + ' ' + metadata.get('title', '')
-        # Common model organisms in space biology
-        if 'arabidopsis' in description.lower():
-            species = "Arabidopsis thaliana"
-        elif 'mouse' in description.lower() or 'mus musculus' in description.lower():
-            species = "Mus musculus"
-        elif 'human' in description.lower() or 'homo sapiens' in description.lower():
-            species = "Homo sapiens"
-        elif 'fruit fly' in description.lower() or 'drosophila' in description.lower():
-            species = "Drosophila melanogaster"
-        elif 'yeast' in description.lower() or 'saccharomyces' in description.lower():
-            species = "Saccharomyces cerevisiae"
-        elif 'e. coli' in description.lower() or 'escherichia coli' in description.lower():
-            species = "Escherichia coli"
-        elif 'c. elegans' in description.lower() or 'caenorhabditis' in description.lower():
-            species = "Caenorhabditis elegans"
+    # If still unknown, return as is without hardcoded patterns
+    # Removed hardcoded species detection to prevent hardcoding
     
     return species
 
@@ -255,18 +248,8 @@ def extract_mission_info(metadata):
                 mission = mission_data
                 break
     
-    # If still unknown, try to extract from description or title
-    if mission == "Unknown":
-        description = metadata.get('description', '') + ' ' + metadata.get('title', '')
-        # Common space missions/programs
-        if 'iss' in description.lower() or 'international space station' in description.lower():
-            mission = "International Space Station"
-        elif 'shuttle' in description.lower():
-            mission = "Space Shuttle"
-        elif 'ground' in description.lower():
-            mission = "Ground Control"
-        elif 'mars' in description.lower():
-            mission = "Mars Mission Simulation"
+    # If still unknown, return as is without hardcoded patterns
+    # Removed hardcoded mission detection to prevent hardcoding
     
     return mission
 
@@ -290,7 +273,8 @@ async def root():
             "GET /osdr-files/{study_id}": "Get files for a specific OSDR study",
             "POST /analyze": "Analyze data using transformer-based AI model",
             "POST /summarize": "Generate retrieval-augmented summary for a query",
-            "POST /incremental-ingest": "Run incremental ingest with change detection"
+            "POST /incremental-ingest": "Run incremental ingest with change detection",
+            "POST /scientific-data-analysis": "Analyze actual scientific data files from NASA OSDR studies"
         }
     }
 
@@ -484,8 +468,9 @@ async def get_statistics():
     }
 
 @app.get("/osdr-files")
-async def get_osdr_files():
-    """Get all OSDR files with metadata, classified by type and experiment"""
+async def get_osdr_files(limit: int = Query(100, description="Maximum number of files to return", ge=1, le=1000), 
+                        offset: int = Query(0, description="Number of files to skip", ge=0)):
+    """Get all OSDR files with metadata, classified by type and experiment, with pagination support"""
     global publications_cache
     
     logger.info("Fetching OSDR files endpoint called")
@@ -613,8 +598,18 @@ async def get_osdr_files():
                 "mission": mission
             })
     
-    logger.info(f"Returning {len(files)} OSDR files")
-    return files
+    # Apply pagination
+    total_files = len(files)
+    paginated_files = files[offset:offset + limit]
+    
+    logger.info(f"Returning {len(paginated_files)} OSDR files (limited from {total_files} total files)")
+    return {
+        "files": paginated_files,
+        "total": total_files,
+        "limit": limit,
+        "offset": offset,
+        "has_more": offset + limit < total_files
+    }
 
 @app.get("/osdr-files/{study_id}")
 async def get_osdr_files_by_study(study_id: str):
@@ -733,11 +728,72 @@ async def get_osdr_files_by_study(study_id: str):
 async def analyze_data(data: dict):
     """Analyze NASA OSDR data using transformer-based AI model"""
     try:
-        logger.info("Starting transformer-based analysis...")
+        logger.info("=" * 60)
+        logger.info("AI Engine: Starting comprehensive data analysis")
+        logger.info("=" * 60)
+        
+        # Log data size information
+        data_size = len(data.get('publications', [])) if isinstance(data, dict) else len(data) if isinstance(data, list) else 0
+        logger.info(f"AI Engine: Processing {data_size} publications")
+        logger.info("AI Engine: Initializing transformer-based analysis engine...")
+        
+        # Show progress visualization header
+        logger.info("-" * 60)
+        logger.info("AI Engine: Analysis Progress Visualization")
+        logger.info("-" * 60)
+        
+        # Perform analysis with progress tracking
         results = transformer_analyzer.analyze_data(data)
+        
+        # Show completion
+        logger.info("-" * 60)
+        logger.info("AI Engine: Analysis Progress Visualization - COMPLETE")
+        logger.info("-" * 60)
+        
+        # Add clustering data from NASADataAnalyzer if not already present
+        # Only add clustering data if we have publications data to analyze
+        if data and len(data) > 0:
+            try:
+                # Initialize NASADataAnalyzer to get clustering data
+                data_analyzer = NASADataAnalyzer()
+                # Load data for analysis (this will use the data passed in)
+                if data_analyzer.load_data().empty:
+                    # If no cached data, create a temporary DataFrame from the input data
+                    import pandas as pd
+                    # Convert input data to DataFrame format expected by NASADataAnalyzer
+                    temp_data = []
+                    if 'publications' in data:
+                        temp_data = data['publications']
+                    elif 'data' in data and 'publications' in data['data']:
+                        temp_data = data['data']['publications']
+                    elif isinstance(data, list):
+                        temp_data = data
+                    
+                    if temp_data:
+                        data_analyzer.df = pd.DataFrame(temp_data)
+                        # Add required columns if missing
+                        required_columns = ['authors', 'organisms', 'keywords', 'abstract', 'title', 'publication_date']
+                        for col in required_columns:
+                            if col not in data_analyzer.df.columns:
+                                data_analyzer.df[col] = data_analyzer.df.get(col, [])
+                        
+                        # Perform clustering analysis
+                        clustering_data = data_analyzer.perform_clustering_analysis()
+                        if clustering_data:
+                            results['clustering'] = clustering_data
+                            logger.info("AI Engine: Added clustering analysis data")
+            except Exception as e:
+                logger.warning(f"Failed to add clustering data: {e}")
+                # Continue without clustering data rather than failing completely
+        
+        logger.info("=" * 60)
+        logger.info("AI Engine: Data analysis completed successfully")
+        logger.info("=" * 60)
+        
         return {"success": True, "data": results}
     except Exception as e:
-        logger.error(f"Transformer analysis failed: {e}")
+        logger.error(f"AI Engine: Transformer analysis failed: {e}")
+        logger.error("=" * 60)
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 @app.post("/summarize")
@@ -803,6 +859,92 @@ async def run_incremental_ingest(request: IncrementalIngestRequest):
     except Exception as e:
         logger.error(f"Incremental ingest failed: {e}")
         raise HTTPException(status_code=500, detail=f"Incremental ingest failed: {str(e)}")
+
+@app.post("/scientific-data-analysis")
+async def analyze_scientific_data(request: ScientificDataAnalysisRequest):
+    """Analyze actual scientific data files from NASA OSDR studies"""
+    global publications_cache
+    
+    try:
+        logger.info("Starting scientific data analysis...")
+        
+        # Load publications if not cached
+        if not publications_cache:
+            publications_cache = load_publications_from_file()
+        
+        if not publications_cache:
+            raise HTTPException(status_code=404, detail="No publications found. Please process data first.")
+        
+        # Filter publications based on request
+        if request.study_id:
+            # Analyze specific study
+            target_publications = [
+                pub for pub in publications_cache 
+                if pub.get('osdr_id') == request.study_id
+            ]
+            if not target_publications:
+                raise HTTPException(status_code=404, detail=f"Study {request.study_id} not found.")
+        else:
+            # Analyze a sample of studies
+            target_publications = publications_cache[:request.limit]
+        
+        # Run scientific data analysis
+        async with ScientificDataAnalyzer() as analyzer:
+            # Process studies concurrently
+            tasks = [
+                analyzer.analyze_study_data(study) 
+                for study in target_publications
+            ]
+            study_results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Filter out errors
+            valid_results = [
+                result for result in study_results 
+                if isinstance(result, dict) and 'error' not in result
+            ]
+            
+            # Generate overall summary
+            total_studies = len(target_publications)
+            processed_studies = len(valid_results)
+            
+            # Aggregate insights
+            all_insights = []
+            for result in valid_results:
+                all_insights.extend(result.get('scientific_insights', []))
+            
+            # Data type summary
+            data_type_summary = {}
+            file_type_summary = {}
+            category_summary = {}
+            
+            for result in valid_results:
+                for data_type, count in result.get('data_type_distribution', {}).items():
+                    data_type_summary[data_type] = data_type_summary.get(data_type, 0) + count
+                
+                for file_type, count in result.get('file_type_distribution', {}).items():
+                    file_type_summary[file_type] = file_type_summary.get(file_type, 0) + count
+                    
+                for category, count in result.get('data_category_distribution', {}).items():
+                    category_summary[category] = category_summary.get(category, 0) + count
+            
+            overall_analysis = {
+                "analysis_timestamp": datetime.now().isoformat(),
+                "total_studies_analyzed": total_studies,
+                "successfully_processed_studies": processed_studies,
+                "processing_success_rate": processed_studies / total_studies if total_studies > 0 else 0,
+                "data_type_distribution": data_type_summary,
+                "file_type_distribution": file_type_summary,
+                "data_category_distribution": category_summary,
+                "key_scientific_insights": list(set(all_insights)),  # Remove duplicates
+                "study_level_analyses": valid_results
+            }
+            
+            logger.info(f"Scientific data analysis completed. {processed_studies}/{total_studies} studies processed.")
+            return {"success": True, "results": overall_analysis}
+            
+    except Exception as e:
+        logger.error(f"Scientific data analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Scientific data analysis failed: {str(e)}")
 
 # Background tasks
 async def process_osdr_data():

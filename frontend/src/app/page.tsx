@@ -25,7 +25,11 @@ export default function HomePage() {
       case 'search':
         return <Search onBack={() => handleNavigate('dashboard')} />
       case 'knowledge-graph':
-        return <KnowledgeGraph onBack={() => handleNavigate('dashboard')} width={1000} height={700} />
+        return (
+          <div className="flex-1 overflow-hidden p-4 h-[calc(100vh-200px)]">
+            <KnowledgeGraph onBack={() => handleNavigate('dashboard')} />
+          </div>
+        )
       case 'analytics':
         return <Analytics onBack={() => handleNavigate('dashboard')} />
       case 'osdr-files':
@@ -38,7 +42,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col">
       <Header currentPage={currentPage} onNavigate={handleNavigate} />
-      <div className="flex-1">
+      <div className="flex-1 overflow-auto">
         {renderCurrentPage()}
       </div>
       <Footer />

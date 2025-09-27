@@ -22,7 +22,7 @@ This module provides comprehensive natural language analysis for NASA space biol
 - **Safety Considerations**: Identify safety protocols and considerations
 
 ### 2. Literature Analysis
-- **AI-Powered Summarization**: Generate concise summaries using Mistral AI
+- **AI-Powered Summarization**: Generate concise summaries using local transformer models
 - **Key Findings Extraction**: Identify main research findings and conclusions
 - **Methodology Analysis**: Extract experimental approaches and techniques
 - **Research Gap Identification**: Discover underexplored research areas
@@ -63,9 +63,7 @@ python -m nltk.downloader punkt stopwords
 
 ### Environment Setup
 ```bash
-# Set Mistral AI API key for enhanced analysis
-export MISTRAL_API_KEY="your_mistral_api_key_here"
-
+# No external API keys required - all models run locally
 # Optional: Set custom Python path
 export PYTHON_PATH="/usr/bin/python3"
 ```
@@ -76,7 +74,7 @@ export PYTHON_PATH="/usr/bin/python3"
 
 ```bash
 # Run complete analysis demo
-python nlp_demo.py --api-key YOUR_MISTRAL_KEY
+python nlp_demo.py
 
 # Use sample data for testing
 python nlp_demo.py --mode demo
@@ -101,20 +99,21 @@ async def main():
         documents = json.load(f)
     
     # Run comprehensive NLP analysis
-    results = await analyze_nasa_documents(documents, mistral_api_key='your_key')
+    results = await analyze_nasa_documents(documents)
     
     print(f"Analyzed {results['analysis_summary']['total_documents']} documents")
     print(f"Generated {results['analysis_summary']['hypotheses_generated']} hypotheses")
     print(f"Found {results['analysis_summary']['cross_references_found']} cross-references")
 
+# Example usage without API key
 asyncio.run(main())
 ```
 
 ### Individual Component Usage
 
-```python
+```
 async def analyze_components():
-    async with NaturalLanguageAnalyzer(mistral_api_key='your_key') as analyzer:
+    async with NaturalLanguageAnalyzer() as analyzer:
         
         # 1. Analyze experiment metadata
         metadata = await analyzer.analyze_experiment_metadata(experiment_doc)
@@ -163,7 +162,7 @@ async def analyze_components():
 
 ### REST API Integration
 
-```javascript
+```
 // Complete NLP analysis
 const response = await fetch('/api/nlp/analyze', {
   method: 'POST',
@@ -209,9 +208,7 @@ console.log(`Generated ${hypotheses.data.hypotheses.length} hypotheses`);
 ### Environment Variables
 
 ```bash
-# Required for enhanced AI analysis
-MISTRAL_API_KEY=your_mistral_api_key
-
+# No external API keys required - all models run locally
 # Optional configurations  
 PYTHON_PATH=/usr/bin/python3
 NLP_TIMEOUT=300000  # 5 minutes
@@ -223,7 +220,6 @@ SIMILARITY_THRESHOLD=0.3
 
 ```python
 analysis_options = {
-    'mistral_api_key': 'your_key',
     'research_area': 'Human Physiology',  # Filter by research area
     'similarity_threshold': 0.3,          # Cross-reference threshold
     'max_hypotheses': 5,                  # Limit hypothesis generation
@@ -420,14 +416,12 @@ combined_insights = {
 ## 📈 Performance Considerations
 
 - **Document Limits**: Processes up to 50 documents per request for optimal performance
-- **API Rate Limits**: Includes automatic rate limiting for Mistral AI API calls
 - **Caching**: Results are cached to avoid redundant processing
 - **Timeouts**: 5-minute timeout for long-running analyses
 - **Memory Management**: Efficient processing of large document collections
 
 ## 🛡️ Security & Privacy
 
-- **API Key Security**: Mistral API keys are securely handled
 - **Data Privacy**: No document content is stored permanently
 - **Access Control**: API endpoints include proper authentication
 - **Audit Logging**: All analysis requests are logged for security

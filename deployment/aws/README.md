@@ -45,7 +45,6 @@ eb deploy
 ### Step 3: Configure environment variables
 ```bash
 # Set environment variables
-eb setenv MISTRAL_API_KEY=your-mistral-key
 eb setenv NODE_ENV=production
 eb setenv NEXT_PUBLIC_API_URL=https://nasa-space-biology.elasticbeanstalk.com
 ```
@@ -145,9 +144,6 @@ Your app will be available at: `http://your-ec2-ip:3000`
 Create a `.env` file with these variables:
 
 ```bash
-# API Keys
-MISTRAL_API_KEY=your-mistral-api-key
-
 # Database
 POSTGRES_DB=nasa_biology
 POSTGRES_USER=postgres

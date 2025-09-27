@@ -97,6 +97,39 @@ cp backend/.env.example backend/.env
 # Configure your environment variables
 ```
 
+4. **Database Setup (Optional but Recommended)**
+
+The application can run with or without a database. For better performance, we recommend setting up the PostgreSQL database:
+
+**Option 1: Using Docker (Recommended)**
+```bash
+# Start the database
+# From the backend directory
+docker-compose -f ../docker-compose.yml up -d postgres
+
+# Initialize the database
+# From the backend directory
+npm run db:init
+```
+
+**Option 2: Using Local PostgreSQL**
+1. Install PostgreSQL (version 12 or higher)
+2. Create a database:
+   ```sql
+   CREATE DATABASE nasa_space_biology;
+   CREATE USER postgres WITH PASSWORD 'password';
+   GRANT ALL PRIVILEGES ON DATABASE nasa_space_biology TO postgres;
+   ```
+3. Initialize the database:
+   ```bash
+   # From the backend directory
+   npm run db:init
+   ```
+
+**Option 3: No Database (Fallback Mode)**
+
+If you don't have PostgreSQL available, the application will automatically fall back to using the data pipeline API. This mode works but may be slower for some operations.
+
 4. **Start the application**
 
 #### Option 1: Using the PowerShell Script (Windows)
@@ -109,15 +142,19 @@ cp backend/.env.example backend/.env
 Start each service in a separate terminal:
 
 ```bash
-# Terminal 1: Start Data Pipeline
+# Terminal 1: Start Database (Optional but Recommended)
+# From the backend directory
+start-db.bat
+
+# Terminal 2: Start Data Pipeline
 cd data-pipeline
 python -m uvicorn main:app --host localhost --port 8003
 
-# Terminal 2: Start Backend
+# Terminal 3: Start Backend
 cd backend
 npm run dev
 
-# Terminal 3: Start Frontend
+# Terminal 4: Start Frontend
 cd frontend
 npm run dev
 ```
@@ -164,6 +201,15 @@ Open your browser to http://localhost:3000
 - Geographic research distribution
 - Funding and resource allocation
 
+### Advanced Visualizations
+- Heatmaps & Correlation Analysis
+- Volcano Plots for Differential Analysis
+- Time Series Analysis with Trend Detection
+- Principal Component Analysis (PCA)
+- Network Analysis for Collaboration Mapping
+- 3D Research Landscapes
+- Real-time Data Streaming
+
 ## 🧪 Technologies Used
 
 ### Frontend Stack
@@ -181,7 +227,7 @@ Open your browser to http://localhost:3000
 ### Data & AI Stack
 - Python, Pandas, NumPy
 - spaCy, NLTK, Transformers
-- Sentence Transformers
+- Sentence Transformers (all-MiniLM-L6-v2, distilbert-base-uncased)
 - FAISS for similarity search
 
 ### Infrastructure
@@ -195,7 +241,7 @@ Open your browser to http://localhost:3000
 ### Phase 1: Foundation (Current)
 - [x] Project setup and architecture
 - [x] Data pipeline implementation
-- [x] Basic web interface
+- [x] Advanced visualization dashboard
 
 ### Phase 2: Core Features
 - [x] Local AI integration

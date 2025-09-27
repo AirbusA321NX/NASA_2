@@ -1,8 +1,8 @@
 # NASA OSDR Complete Data Analysis Pipeline
 
-🚀 **Complete implementation of the workflow**: Get Data → Preprocess → Summarize → Use Mistral → Dashboard
+🚀 **Complete implementation of the workflow**: Get Data → Preprocess → Summarize → Analyze with Local AI → Dashboard
 
-This pipeline fetches real NASA OSDR data, performs comprehensive analysis, generates AI insights, and displays everything in an interactive dashboard.
+This pipeline fetches real NASA OSDR data, performs comprehensive analysis, generates AI insights using local models, and provides data for the consolidated dashboard.
 
 ## 🎯 Workflow Overview
 
@@ -11,8 +11,8 @@ graph TD
     A[NASA OSDR S3 Repository] --> B[Data Fetcher]
     B --> C[Python Analysis Engine]
     C --> D[Statistical Summaries]
-    D --> E[Mistral AI Engine]
-    E --> F[Streamlit Dashboard]
+    D --> E[Local AI Engine]
+    E --> F[Consolidated Dashboard]
     
     C --> G[Pandas/NumPy Processing]
     C --> H[ML Clustering]
@@ -38,9 +38,7 @@ python -m spacy download en_core_web_sm
 
 ### 2. Set Environment Variables
 ```bash
-# Required for AI insights
-export MISTRAL_API_KEY="your-mistral-api-key"
-
+# No external API keys required - all models run locally
 # Optional for enhanced features
 export AWS_ACCESS_KEY_ID="your-aws-key"
 export AWS_SECRET_ACCESS_KEY="your-aws-secret"
@@ -56,7 +54,7 @@ mkdir data
 ### Option 1: Run Complete Pipeline
 ```bash
 # Full pipeline with real NASA data
-python pipeline_orchestrator.py --mode full --api-key YOUR_MISTRAL_KEY
+python pipeline_orchestrator.py --mode full
 ```
 
 ### Option 2: Step-by-Step Execution
@@ -65,15 +63,15 @@ python pipeline_orchestrator.py --mode full --api-key YOUR_MISTRAL_KEY
 python pipeline_orchestrator.py --mode analyze
 
 # Step 2: Generate AI Insights  
-python pipeline_orchestrator.py --mode mistral --api-key YOUR_MISTRAL_KEY
+python pipeline_orchestrator.py --mode local-ai
 
-# Step 3: Launch Dashboard
-python pipeline_orchestrator.py --mode dashboard
+# Step 3: Start API Server (for consolidated dashboard)
+python pipeline_orchestrator.py --mode api
 ```
 
-### Option 3: Direct Dashboard Launch
+### Option 3: Direct API Launch
 ```bash
-streamlit run dashboard.py
+uvicorn main:app --host localhost --port 8003
 ```
 
 ## 📊 Pipeline Components
@@ -98,10 +96,10 @@ streamlit run dashboard.py
 
 ### 3. 📝 Text Summarizer (Built into Analyzer)
 - **Purpose**: Turn numerical findings into short text summaries
-- **Output**: Human-readable summaries optimized for Mistral AI processing
+- **Output**: Human-readable summaries optimized for local AI processing
 
-### 4. 🤖 Mistral AI Engine (`mistral_engine.py`)
-- **Purpose**: Feed summaries into Mistral for natural-language explanations
+### 4. 🤖 Local AI Engine (`transformer_analyzer.py`)
+- **Purpose**: Process summaries with local transformer models for natural-language explanations
 - **Insight Types**:
   - **Scientific Explanations**: What findings mean for space biology
   - **Research Gaps**: Underexplored areas and opportunities
@@ -110,25 +108,25 @@ streamlit run dashboard.py
   - **Public Summaries**: Accessible explanations for general audience
   - **Q&A Responses**: Answers to common research questions
 
-### 5. 📈 Interactive Dashboard (`dashboard.py`)
-- **Purpose**: Streamlit app showing charts + Mistral's interpretations
+### 5. 📈 Data API (`main.py`)
+- **Purpose**: FastAPI backend providing data for the consolidated dashboard
 - **Features**:
-  - **Real-time Data Processing**: Run analysis from the dashboard
-  - **Interactive Visualizations**: Plotly charts for exploration
-  - **AI Insights Display**: Organized presentation of Mistral insights
-  - **Data Exploration**: Browse raw publications
-  - **Export Capabilities**: Download results and insights
+  - **Real-time Data Processing**: API endpoints for analysis results
+  - **Data Endpoints**: RESTful APIs for all analysis data
+  - **AI Insights API**: Endpoints for local AI insights
+  - **Search Functionality**: Publication search and filtering
+  - **Export Capabilities**: Data export in multiple formats
 
 ## 🔗 API Integration
 
-The pipeline also provides a FastAPI backend (`main.py`) for integration:
+The pipeline provides a FastAPI backend (`main.py`) for integration with the consolidated dashboard:
 
 ```python
 # Example API usage
 import requests
 
 # Process data
-response = requests.post("http://localhost:8001/process")
+response = requests.post("http://localhost:8003/process")
 
 # Search publications
 search_data = {
@@ -136,32 +134,30 @@ search_data = {
     "research_areas": ["Human Physiology"],
     "limit": 50
 }
-response = requests.post("http://localhost:8001/search", json=search_data)
+response = requests.post("http://localhost:8003/search", json=search_data)
 
 # Get statistics
-response = requests.get("http://localhost:8001/statistics")
+response = requests.get("http://localhost:8003/statistics")
 ```
 
 ## 📋 Usage Examples
 
 ### Example 1: Full Pipeline with Real Data
 ```bash
-# Set your Mistral API key
-export MISTRAL_API_KEY="your-key-here"
-
 # Run complete pipeline
 python pipeline_orchestrator.py --mode full
 
-# Dashboard will launch at http://localhost:8501
+# API server will be available at http://localhost:8003
+# Access consolidated dashboard at http://localhost:3000
 ```
 
 ### Example 2: Analysis Only (No AI)
 ```bash
-# Run analysis without Mistral AI
+# Run analysis without AI processing
 python pipeline_orchestrator.py --mode analyze
 
-# Then launch dashboard to view results
-streamlit run dashboard.py
+# Then start API server for dashboard access
+uvicorn main:app --host localhost --port 8003
 ```
 
 ## 📁 Output Files
@@ -172,7 +168,7 @@ The pipeline generates several data files:
 data/
 ├── processed_publications.json    # Raw NASA OSDR data
 ├── analysis_results.json         # Statistical analysis results
-└── mistral_insights.json         # AI-generated insights
+└── local_ai_insights.json        # AI-generated insights
 ```
 
 ### Sample Output Structure:
@@ -196,7 +192,7 @@ data/
 }
 ```
 
-**`mistral_insights.json`**:
+**`local_ai_insights.json`**:
 ```json
 {
   "insights": {
@@ -213,33 +209,31 @@ data/
 }
 ```
 
-## 🎛️ Dashboard Features
+## 🎛️ Dashboard Integration
 
-### Main Dashboard Sections:
+### Consolidated Dashboard Access:
+The data pipeline now feeds into a consolidated dashboard built with Next.js, accessible at:
+- **Dashboard URL**: http://localhost:3000
+- **API Endpoint**: http://localhost:8003
 
+### Dashboard Features:
 1. **📊 Key Metrics**: Total publications, research areas, organisms, timeline
-2. **📈 Visualizations**: 
-   - Publication trends over time
-   - Research area distribution
-   - Organism usage patterns
-   - Collaboration networks
-3. **🤖 AI Insights**: Organized tabs for different insight types
+2. **📈 Advanced Visualizations**: 
+   - Interactive heatmaps and correlation analysis
+   - Volcano plots for differential analysis
+   - Time series analysis with trend detection
+   - Principal component analysis (PCA)
+   - Network analysis for collaboration mapping
+   - 3D research landscapes
+   - Real-time data streaming
+3. **🤖 AI Insights**: Organized presentation of local AI insights
 4. **📋 Data Explorer**: Interactive table of raw publications
-5. **🔧 Control Panel**: Run analysis and generate insights
-
-### Interactive Controls:
-- **Run Data Analysis**: Fetch and analyze NASA OSDR data
-- **Generate AI Insights**: Process with Mistral AI
-- **Filter & Search**: Explore specific research areas or time periods
-- **Export Results**: Download data and insights
+5. **🔍 Search & Filter**: Advanced search capabilities
 
 ## 🔧 Configuration Options
 
 ### Environment Variables:
 ```bash
-# Required
-MISTRAL_API_KEY=your-mistral-api-key
-
 # Optional
 AWS_ACCESS_KEY_ID=your-aws-key
 AWS_SECRET_ACCESS_KEY=your-aws-secret
@@ -251,7 +245,6 @@ REDIS_URL=redis://...
 ```bash
 python pipeline_orchestrator.py \
     --mode full \
-    --api-key YOUR_KEY \
     --verbose               # Enable debug logging
 ```
 
@@ -274,29 +267,21 @@ See `../deployment/aws/README.md` for AWS deployment options:
 
 ### Common Issues:
 
-1. **Missing API Key**:
-   ```bash
-   export MISTRAL_API_KEY="your-key"
-   # or
-   python pipeline_orchestrator.py --api-key YOUR_KEY
-   ```
-
-2. **Missing Dependencies**:
+1. **Missing Dependencies**:
    ```bash
    pip install -r requirements.txt
    python -m spacy download en_core_web_sm
    ```
 
-3. **Data Directory Issues**:
+2. **Data Directory Issues**:
    ```bash
    mkdir data
    chmod 755 data
    ```
 
-4. **Port Conflicts**:
-   - Dashboard: http://localhost:8501
-   - API: http://localhost:8001
-   - Frontend: http://localhost:3000
+3. **Port Conflicts**:
+   - API Server: http://localhost:8003
+   - Frontend Dashboard: http://localhost:3000
 
 ### Debug Mode:
 ```bash
@@ -307,13 +292,13 @@ python pipeline_orchestrator.py --mode full --verbose
 
 - **Real Data**: ~10-15 minutes for complete pipeline
 - **Analysis Only**: ~1-2 minutes
-- **Dashboard**: Launches in ~30 seconds
+- **API Server**: Launches in ~10 seconds
 
 ## 🤝 Contributing
 
 1. Add new analysis components to `data_analyzer.py`
-2. Enhance Mistral prompts in `mistral_engine.py`
-3. Add dashboard features in `dashboard.py`
+2. Enhance local AI processing in `transformer_analyzer.py`
+3. Add API endpoints in `main.py`
 4. Update pipeline orchestration in `pipeline_orchestrator.py`
 
 ## 📄 License
@@ -322,4 +307,4 @@ MIT License - See main project README for details.
 
 ---
 
-🚀 **Ready to explore NASA space biology data with AI-powered insights!**
+🚀 **Ready to explore NASA space biology data with AI-powered insights through our consolidated dashboard!**

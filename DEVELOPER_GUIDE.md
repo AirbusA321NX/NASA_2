@@ -22,7 +22,7 @@ This comprehensive guide will help you understand, deploy, and extend the NASA S
 The NASA Space Biology Knowledge Engine is a comprehensive platform that:
 
 - **Processes 608+ NASA bioscience publications** from the OSDR repository
-- **Uses Mistral AI** for intelligent analysis and summarization
+- **Uses Local AI Models** for intelligent analysis and summarization
 - **Builds knowledge graphs** to show research relationships
 - **Provides interactive visualizations** for data exploration
 - **Offers semantic search** capabilities across all publications
@@ -30,7 +30,7 @@ The NASA Space Biology Knowledge Engine is a comprehensive platform that:
 
 ### Key Features
 
-- 🧠 **AI-Powered Analysis**: Mistral AI for summarization and insights
+- 🧠 **AI-Powered Analysis**: Local transformer models for summarization and insights
 - 🕸️ **Knowledge Graph**: Interactive network visualization
 - 🔍 **Advanced Search**: Semantic search with multiple filters
 - 📊 **Analytics Dashboard**: Research trends and statistics
@@ -100,9 +100,9 @@ docker-compose up -d --build
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   PostgreSQL    │    │     Neo4j       │    │   Mistral AI    │
+│   PostgreSQL    │    │     Neo4j       │    │   Local AI      │
 │   (Metadata)    │    │ (Knowledge Graph)│    │   (Analysis)    │
-│   Port: 5432    │    │   Port: 7687    │    │   (External)    │
+│   Port: 5432    │    │   Port: 7687    │    │   (Internal)    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -114,10 +114,10 @@ docker-compose up -d --build
 - **State Management**: Zustand for global state
 - **Visualizations**: D3.js, Recharts, Cytoscape.js
 - **Features**: 
-  - Interactive dashboard
+  - Consolidated dashboard with advanced visualizations
+  - Interactive analytics with multiple chart types
   - Advanced search interface
   - Knowledge graph visualization
-  - Analytics charts
   - Responsive design
 
 #### Backend API (Node.js/Express)
@@ -136,7 +136,7 @@ docker-compose up -d --build
 - **Framework**: FastAPI for high-performance APIs
 - **Data Processing**: Pandas, NumPy for data manipulation
 - **NLP**: spaCy, NLTK for text processing
-- **AI Integration**: Mistral AI client
+- **AI Integration**: Local transformer models
 - **Features**:
   - NASA OSDR data fetching
   - Heterogeneous file processing
@@ -198,8 +198,6 @@ analytics_cache (
 GET /api/publications
 GET /api/publications/:id
 GET /api/publications/meta/research-areas
-GET /api/publications/meta/organisms
-GET /api/publications/meta/trending
 ```
 
 #### Search API
@@ -305,9 +303,8 @@ async def process_osdr_data():
         # 3. Extract text from PDFs
         text = extract_text_from_pdf(extracted['paper.pdf'])
         
-        # 4. AI analysis with Mistral
-        summary = await analyze_with_mistral(text, 'summarize')
-        keywords = await analyze_with_mistral(text, 'extract_keywords')
+        # 4. AI analysis with local models
+        # Summary and keyword extraction using local transformer models
         
         # 5. Entity extraction
         entities = extract_entities(text)
@@ -350,61 +347,170 @@ app.include_processor(CustomDataProcessor())
 
 ## 🤖 AI Integration
 
-### Mistral AI Setup
+The NASA Space Biology Knowledge Engine leverages state-of-the-art local AI models for intelligent analysis of space biology research publications.
 
-1. **Get API Key**:
-   - Visit https://console.mistral.ai/
-   - Create account and generate API key
-   - Add to `.env`: `MISTRAL_API_KEY=your_key_here`
+### Local AI Models
 
-2. **Available AI Features**:
-   - Publication summarization
-   - Keyword extraction
-   - Research gap analysis
-   - Hypothesis generation
-   - Semantic similarity
+#### Primary Models
+- **all-MiniLM-L6-v2**: For semantic search and document similarity
+- **distilbert-base-uncased**: For text classification and entity extraction
+- **Sentence Transformers**: For generating embeddings
 
-### Example AI Usage
+#### Model Capabilities
+1. **Semantic Analysis**: Understanding research context and relationships
+2. **Text Summarization**: Automated generation of research summaries
+3. **Entity Recognition**: Identification of organisms, research areas, and key terms
+4. **Research Gap Identification**: Detection of underexplored research areas
+5. **Clustering**: Grouping similar research publications
+6. **Similarity Matching**: Finding related studies and concepts
 
-```javascript
-// Backend service usage
-const mistralService = new MistralAIService();
+### Implementation Architecture
 
-// Generate summary
-const summary = await mistralService.generateSummary(
-  publication.abstract,
-  { focus: 'methodology', length: 'short' }
-);
-
-// Extract keywords
-const keywords = await mistralService.extractKeywords(
-  publication.fullText,
-  10
-);
-
-// Analyze research gaps
-const gaps = await mistralService.analyzeResearchGaps(
-  publications,
-  'Human Physiology'
-);
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend API   │    │  Data Pipeline  │
+│                 │    │                 │    │                 │
+│ User Interface  │◄──►│  REST API       │◄──►│  Python Service │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                       │
+                                ▼                       ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │ Local AI        │    │ Local AI        │
+                       │ Analyzer        │    │ Transformer     │
+                       │ (Node.js)       │    │ Analyzer        │
+                       │                 │    │ (Python)        │
+                       └─────────────────┘    └─────────────────┘
 ```
 
-### Custom AI Prompts
+### 1. Local AI Analyzer (Node.js)
 
-Extend the AI service with custom prompts:
+Located in `backend/src/services/localAIAnalyzer.js`, this service provides JavaScript-based AI analysis with Python transformer fallback.
 
+**Key Features:**
+- Semantic analysis of research publications
+- Research trend identification
+- Gap analysis in current research
+- Organism and research area clustering
+- Future research predictions
+- Confidence scoring for all analyses
+
+**Usage Example:**
 ```javascript
-// backend/src/services/mistralAI.js
-async function customAnalysis(text, analysisType) {
-  const prompts = {
-    mission_relevance: `Analyze how this research applies to Mars missions: ${text}`,
-    safety_implications: `Identify safety considerations for space missions: ${text}`,
-    technology_gaps: `What technology is needed to implement these findings: ${text}`
-  };
-  
-  return await this.makeRequest(prompts[analysisType]);
+const localAI = new LocalAIAnalyzer();
+const analysis = await localAI.analyzeData(nasaData);
+```
+
+### 2. Transformer Analyzer (Python)
+
+Located in `data-pipeline/transformer_analyzer.py`, this service provides high-performance transformer-based analysis using pre-trained models.
+
+**Key Features:**
+- High-accuracy semantic embeddings using all-MiniLM-L6-v2
+- Detailed text classification with distilbert-base-uncased
+- Research area clustering using K-means
+- Semantic similarity calculations
+- Research gap detection using cosine similarity
+
+**API Endpoint:**
+```http
+POST /analyze
+Content-Type: application/json
+
+{
+  "publications": [...],
+  "research_areas": {...},
+  "organisms": [...]
 }
 ```
+
+### 3. Analysis Pipeline
+
+The AI analysis follows this pipeline:
+
+1. **Data Preparation**: NASA OSDR data is prepared for analysis
+2. **Semantic Embedding**: Text is converted to vector representations
+3. **Clustering**: Similar research areas and publications are grouped
+4. **Gap Analysis**: Underrepresented research areas are identified
+5. **Trend Analysis**: Research patterns over time are detected
+6. **Summary Generation**: Key findings are extracted and formatted
+7. **Confidence Scoring**: Each analysis is scored for reliability
+
+### 4. Local AI Analysis
+
+```javascript
+// 1. Overview Analysis
+const overview = await localAI.generateOverview(nasaData);
+
+// 2. Research Trends Analysis  
+const trends = await localAI.analyzeTrends(nasaData);
+
+// 3. Research Gaps Analysis
+const gaps = await localAI.identifyGaps(nasaData);
+
+// 4. Organism Analysis
+const organisms = await localAI.analyzeOrganisms(nasaData);
+```
+
+### Python Transformer Analysis
+
+```python
+# 1. Initialize analyzer
+analyzer = TransformerAnalyzer()
+
+# 2. Analyze NASA data
+results = analyzer.analyze_data(nasa_data)
+
+# 3. Access results
+overview = results['overview']
+trends = results['researchTrends']
+gaps = results['researchGaps']
+```
+
+### Model Performance
+
+| Model | Task | Accuracy | Speed |
+|-------|------|----------|-------|
+| all-MiniLM-L6-v2 | Semantic Search | High | Fast |
+| distilbert-base-uncased | Classification | Medium-High | Medium |
+| Sentence Transformers | Embeddings | High | Fast |
+
+### Configuration
+
+The local AI models are configured through environment variables:
+
+```
+# No external API keys required - all models run locally
+TRANSFORMER_MODEL=all-MiniLM-L6-v2
+CLASSIFIER_MODEL=distilbert-base-uncased
+```
+
+### Production Environment
+```
+# Production environment variables
+NODE_ENV=production
+LOG_LEVEL=info
+# No external API keys required - all models run locally
+TRANSFORMER_MODEL=all-MiniLM-L6-v2
+CLASSIFIER_MODEL=distilbert-base-uncased
+```
+
+### Testing Environment  
+```bash
+# Testing environment variables
+NODE_ENV=test
+LOG_LEVEL=debug
+# No external API keys required - all models run locally
+TRANSFORMER_MODEL=all-MiniLM-L6-v2
+CLASSIFIER_MODEL=distilbert-base-uncased
+```
+
+### Benefits of Local AI
+
+1. **Privacy**: All analysis happens locally, no data leaves your system
+2. **Reliability**: No external service dependencies or rate limits
+3. **Performance**: Optimized for the specific NASA OSDR dataset
+4. **Cost**: No API costs for AI services
+5. **Customization**: Models can be fine-tuned for space biology research
 
 ## 🕸️ Knowledge Graph
 
@@ -412,7 +518,7 @@ async function customAnalysis(text, analysisType) {
 
 The knowledge graph uses Neo4j with the following schema:
 
-```cypher
+``cypher
 // Create constraints
 CREATE CONSTRAINT pub_osdr_id IF NOT EXISTS FOR (p:Publication) REQUIRE p.osdr_id IS UNIQUE;
 CREATE CONSTRAINT area_name IF NOT EXISTS FOR (a:ResearchArea) REQUIRE a.name IS UNIQUE;
@@ -478,11 +584,19 @@ const KnowledgeGraph = ({ data }) => {
    - Path finding
    - Export capabilities
 
-4. **Analytics Charts** (`components/analytics.tsx`)
+4. **Analytics Dashboard** (`components/analytics.tsx`)
    - Research trends
    - Distribution charts
    - Time series data
    - Interactive filters
+   - Advanced visualizations:
+     - Heatmaps & Correlation Analysis
+     - Volcano Plots for Differential Analysis
+     - Time Series Analysis with Trend Detection
+     - Principal Component Analysis (PCA)
+     - Network Analysis for Collaboration Mapping
+     - 3D Research Landscapes
+     - Real-time Data Streaming
 
 ### Styling System
 
@@ -614,12 +728,19 @@ describe('Publications API', () => {
 // tests/components.test.tsx
 import { render, screen } from '@testing-library/react';
 import Dashboard from '../components/dashboard';
+import Analytics from '../components/analytics';
 
 test('renders dashboard with statistics', () => {
   render(<Dashboard />);
   
   expect(screen.getByText('608+')).toBeInTheDocument();
   expect(screen.getByText('Publications')).toBeInTheDocument();
+});
+
+test('renders analytics with visualization selector', () => {
+  render(<Analytics />);
+  
+  expect(screen.getByText('Select Visualization')).toBeInTheDocument();
 });
 ```
 
@@ -692,7 +813,8 @@ npm run dev
 - [Next.js Documentation](https://nextjs.org/docs)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Neo4j Documentation](https://neo4j.com/docs/)
-- [Mistral AI Documentation](https://docs.mistral.ai/)
+- [Sentence Transformers Documentation](https://www.sbert.net/)
+- [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/index)
 
 ### Community
 - [NASA Space Apps Challenge](https://www.spaceappschallenge.org/)
